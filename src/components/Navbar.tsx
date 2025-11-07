@@ -13,13 +13,29 @@ interface NavbarProps {
 export const Navbar = ({ darkMode, toggleDarkMode, user }: NavbarProps) => {
   const navigate = useNavigate();
 
+  /**
+   * Handle navigation with smooth transition
+   * Adds a small delay to allow for smooth page transition animation
+   * 
+   * @param path - The route path to navigate to
+   */
+  const handleNavigate = (path: string) => {
+    // Small delay for smooth transition effect
+    setTimeout(() => {
+      navigate(path);
+    }, 100);
+  };
+
+  /**
+   * Handle sign out and navigate to auth page
+   */
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
       toast.error("Error signing out");
     } else {
       toast.success("Signed out successfully");
-      navigate("/auth");
+      handleNavigate("/auth");
     }
   };
 
@@ -30,37 +46,37 @@ export const Navbar = ({ darkMode, toggleDarkMode, user }: NavbarProps) => {
           <div className="flex items-center gap-8">
             <h1 
               className="text-xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => navigate("/")}
+              onClick={() => handleNavigate("/")}
             >
               BackTrack
             </h1>
             <div className="hidden md:flex gap-1">
               <Button 
                 variant="ghost" 
-                onClick={() => navigate("/")}
-                className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
+                onClick={() => handleNavigate("/")}
+                className="rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-200"
               >
                 Home
               </Button>
               <Button 
                 variant="ghost" 
-                onClick={() => navigate("/lost")}
-                className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
+                onClick={() => handleNavigate("/lost")}
+                className="rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-200"
               >
                 Lost Items
               </Button>
               <Button 
                 variant="ghost" 
-                onClick={() => navigate("/found")}
-                className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
+                onClick={() => handleNavigate("/found")}
+                className="rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-200"
               >
                 Found Items
               </Button>
               {user && (
                 <Button 
                   variant="ghost" 
-                  onClick={() => navigate("/post")}
-                  className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
+                  onClick={() => handleNavigate("/post")}
+                  className="rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-200"
                 >
                   Post Item
                 </Button>
@@ -90,8 +106,8 @@ export const Navbar = ({ darkMode, toggleDarkMode, user }: NavbarProps) => {
               </Button>
             ) : (
               <Button 
-                onClick={() => navigate("/auth")}
-                className="rounded-full bg-primary hover:bg-primary/90 text-white shadow-md shadow-primary/20 transition-all"
+                onClick={() => handleNavigate("/auth")}
+                className="rounded-full bg-primary hover:bg-primary/90 text-white shadow-md shadow-primary/20 transition-all duration-200"
               >
                 Sign In
               </Button>
