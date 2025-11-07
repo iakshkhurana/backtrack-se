@@ -142,14 +142,14 @@ const Auth = () => {
           {/* Logo */}
           <div 
             onClick={() => navigate("/")} 
-            className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent cursor-pointer mb-8"
+            className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent dark:bg-none dark:text-foreground cursor-pointer mb-8"
           >
             BackTrack
           </div>
 
           {/* Header */}
           <h1 className="text-3xl md:text-4xl font-extrabold mb-2">
-            <span className="bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent dark:bg-none dark:text-foreground">
               {isSignUp ? "Get Started Now" : "Welcome Back"}
             </span>
           </h1>
@@ -329,7 +329,7 @@ const Auth = () => {
       </div>
 
       {/* Right Column - Promotional Content */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-purple-600 to-purple-800 text-white p-12 flex-col justify-between relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-accent to-primary/80 dark:from-secondary dark:via-muted dark:to-secondary text-white dark:text-foreground p-12 flex-col justify-between relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{

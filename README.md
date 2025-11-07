@@ -1,5 +1,7 @@
 # BackTrack — Campus Find
 
+![BackTrack Screenshot](./src/assets/image.png)
+
 A lightweight Vite + React + TypeScript app for posting and searching lost & found items on campus. Built with modern UI primitives (shadcn/radix + Tailwind), Supabase for backend/auth/storage, and an optional OpenRouter integration for smart keyword extraction.
 
 ## Table of contents
