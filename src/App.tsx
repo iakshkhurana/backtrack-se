@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageCircle, Send, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ import PostItem from "./pages/PostItem";
 import { extractSearchKeywords } from "@/services/openrouter";
 import { supabase } from "@/integrations/supabase/client";
 import NotFound from "./pages/NotFound";
+import Preloader from "./components/preloader";
 
 const queryClient = new QueryClient();
 
@@ -260,26 +261,57 @@ const AIChatInterface = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/lost" element={<Lost />} />
-          <Route path="/found" element={<Found />} />
-          <Route path="/post" element={<PostItem />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        {/* AI Chat - available on all pages */}
-        <AIChatInterface />
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // State to track if preloader should be shown (only on initial load)
+  const [showPreloader, setShowPreloader] = useState(false);
+
+  /**
+   * Check if preloader has been shown in this session
+   * Only show preloader on initial page load, not on subsequent navigations
+   */
+  useEffect(() => {
+    // Check if preloader has already been shown in this session
+    const preloaderShown = sessionStorage.getItem("preloaderShown");
+    
+    // If not shown, display the preloader
+    if (!preloaderShown) {
+      setShowPreloader(true);
+    }
+  }, []);
+
+  /**
+   * Handle preloader completion
+   * Mark preloader as shown in sessionStorage so it won't show again in this session
+   */
+  const handlePreloaderComplete = () => {
+    // Mark preloader as shown in sessionStorage
+    sessionStorage.setItem("preloaderShown", "true");
+    setShowPreloader(false);
+  };
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          {/* Preloader - only shown on initial page load, not on subsequent navigations */}
+          {showPreloader && <Preloader onComplete={handlePreloaderComplete} />}
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/lost" element={<Lost />} />
+            <Route path="/found" element={<Found />} />
+            <Route path="/post" element={<PostItem />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          {/* AI Chat - available on all pages */}
+          <AIChatInterface />
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
