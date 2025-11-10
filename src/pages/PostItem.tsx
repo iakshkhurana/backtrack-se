@@ -11,8 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Upload, X, Sparkles } from "lucide-react";
+import { Upload, X, Sparkles, Mic } from "lucide-react";
 import { analyzeItemImage } from "@/services/openrouter";
+import { VoiceAssistant } from "@/components/VoiceAssistant";
+import { VoiceItemData } from "@/services/speech-to-text";
 
 const itemSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters").max(100),
@@ -29,6 +31,7 @@ const PostItem = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [showVoiceAssistant, setShowVoiceAssistant] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   
@@ -96,6 +99,24 @@ const PostItem = () => {
   const removeImage = () => {
     setUploadedImage(null);
     setImagePreview(null);
+  };
+
+  /**
+   * Handle data extracted from voice assistant
+   * Auto-fills form fields with voice-collected data
+   * @param data - Structured item data from voice input
+   */
+  const handleVoiceDataExtracted = (data: VoiceItemData) => {
+    setFormData((prev) => ({
+      ...prev,
+      status: data.status || prev.status,
+      title: data.title || prev.title,
+      category: data.category || prev.category,
+      description: data.description || prev.description,
+      location: data.location || prev.location,
+      contact_info: data.contact_info || prev.contact_info,
+    }));
+    toast.success("Form fields filled from voice input!");
   };
 
   /**
@@ -209,7 +230,28 @@ const PostItem = () => {
       
       <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} user={user} />
       
+      {/* Voice Assistant Modal */}
+      {showVoiceAssistant && (
+        <VoiceAssistant
+          onDataExtracted={handleVoiceDataExtracted}
+          onClose={() => setShowVoiceAssistant(false)}
+        />
+      )}
+
       <div className="container mx-auto px-4 py-8 pt-24 max-w-2xl relative z-10">
+        {/* Voice Assistant Button */}
+        <div className="mb-4 flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowVoiceAssistant(true)}
+            className="gap-2"
+          >
+            <Mic className="h-4 w-4" />
+            Use Voice Assistant
+          </Button>
+        </div>
+
         <Card>
           <CardHeader>
           </CardHeader>

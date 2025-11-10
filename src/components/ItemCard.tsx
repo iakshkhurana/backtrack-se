@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 interface ItemCardProps {
   item: {
@@ -26,10 +27,9 @@ interface ItemCardProps {
 
 export const ItemCard = ({ item, currentUserId, onDelete }: ItemCardProps) => {
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this item?")) return;
-
     setDeleting(true);
     try {
       // Delete image from storage if exists
@@ -81,15 +81,28 @@ export const ItemCard = ({ item, currentUserId, onDelete }: ItemCardProps) => {
             )}
           </div>
           {isOwner && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDelete}
-              disabled={deleting}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowDeleteDialog(true)}
+                disabled={deleting}
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+              <ConfirmDialog
+                open={showDeleteDialog}
+                onOpenChange={setShowDeleteDialog}
+                onConfirm={handleDelete}
+                title="Delete Item"
+                description="Are you sure you want to delete this item? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                variant="destructive"
+                isLoading={deleting}
+              />
+            </>
           )}
         </div>
       </CardHeader>

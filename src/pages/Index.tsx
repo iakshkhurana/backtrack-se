@@ -105,7 +105,7 @@ const Index = () => {
         className="fixed left-0 right-0 top-0 h-1 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 origin-left z-[60]"
         style={{ scaleX: scrollYProgress }}
       />
-      <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} user={user} position="absolute" />
+      <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} user={user} position="fixed" />
 
       {/* Hero Section - Full Page */}
       <div className="pt-20">
