@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import heroImage from "@/assets/hero-bg.jpg";
 import img2 from "@/assets/img-2.png";
-import { Search, Upload, Bell, Shield, Users, Clock, ChevronLeft, ChevronRight, Star, AlertCircle, Heart, Sparkles, Zap, Car, IndianRupee, MapPin, Venus } from "lucide-react";
+import { Search, Upload, Bell, Shield, Users, Clock, ChevronLeft, ChevronRight, Star, AlertCircle, Heart, Sparkles, IndianRupee, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 import { HeroSection } from "@/components/hero-section-dark";
 import {
@@ -264,89 +264,6 @@ const Index = () => {
               <p className="text-muted-foreground">
                 Your data is protected with secure authentication, privacy-first design, and verified user profiles.
               </p>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-14 md:py-20 relative z-10 bg-background">
-        <div className="container mx-auto px-4">
-          <motion.div
-            className="mx-auto max-w-4xl text-center mb-10 md:mb-14"
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.5 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          >
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
-              <span className="text-foreground">Key </span>
-              <span className="text-primary">Features</span>
-            </h2>
-            <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-              Make campus lost-and-found effortless with fast search, quick posting, and secure interactions.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 max-w-6xl mx-auto">
-            {/* Create Pools / Quick Posting */}
-            <motion.div
-              className="p-6 rounded-2xl border border-border bg-card hover:shadow-lg transition-all select-none"
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
-            >
-              <div className="w-14 h-14 mb-4 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
-                <Car className="h-7 w-7 text-primary" strokeWidth={2} />
-              </div>
-              <h3 className="text-xl font-bold mb-2 text-foreground">Create Posts</h3>
-              <p className="text-muted-foreground">Easily create lost/found posts with images and details.</p>
-            </motion.div>
-
-            {/* Find Companions / Community */}
-            <motion.div
-              className="p-6 rounded-2xl border border-border bg-card hover:shadow-lg transition-all select-none"
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.45, ease: "easeOut" }}
-            >
-              <div className="w-14 h-14 mb-4 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
-                <Users className="h-7 w-7 text-primary" strokeWidth={2} />
-              </div>
-              <h3 className="text-xl font-bold mb-2 text-foreground">Find Matches</h3>
-              <p className="text-muted-foreground">Connect with students who reported similar items.</p>
-            </motion.div>
-
-            {/* Save Money / Time saved */}
-            <motion.div
-              className="p-6 rounded-2xl border border-border bg-card hover:shadow-lg transition-all select-none"
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            >
-              <div className="w-14 h-14 mb-4 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
-                <Clock className="h-7 w-7 text-primary" strokeWidth={2} />
-              </div>
-              <h3 className="text-xl font-bold mb-2 text-foreground">Save Time</h3>
-              <p className="text-muted-foreground">AI-powered search reduces time to find what you need.</p>
-            </motion.div>
-
-            {/* Female-only / Safety */}
-            <motion.div
-              className="p-6 rounded-2xl border border-border bg-card hover:shadow-lg transition-all select-none"
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.55, ease: "easeOut" }}
-            >
-              <div className="w-14 h-14 mb-4 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
-                <Venus className="h-7 w-7 text-primary" strokeWidth={2} />
-              </div>
-              <h3 className="text-xl font-bold mb-2 text-foreground">Safe by Design</h3>
-              <p className="text-muted-foreground">Privacy-first communication and report verification.</p>
             </motion.div>
           </div>
         </div>

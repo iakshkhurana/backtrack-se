@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mic, MicOff, X, Volume2, Keyboard } from "lucide-react";
 import { toast } from "sonner";
 import { SpeechRecognitionService, extractItemDataFromVoice, VoiceItemData } from "@/services/speech-to-text";
+import { openRouterChat } from "@/services/openrouter";
 
 interface VoiceAssistantProps {
   onDataExtracted: (data: VoiceItemData) => void;
@@ -27,10 +28,14 @@ export const VoiceAssistant = ({ onDataExtracted, onClose }: VoiceAssistantProps
   const [collectedData, setCollectedData] = useState<Partial<VoiceItemData>>({});
   const [questionIndex, setQuestionIndex] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [aiResponse, setAiResponse] = useState<string>("");
   
   const speechServiceRef = useRef<SpeechRecognitionService | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const textInputRef = useRef<HTMLInputElement | null>(null);
+  const spokenQuestionsRef = useRef<Set<number>>(new Set());
+  const currentQuestionIndexRef = useRef<number>(0);
+  const isProcessingAnswerRef = useRef<boolean>(false);
 
   // Questions to ask the user
   const questions = [
@@ -69,11 +74,16 @@ export const VoiceAssistant = ({ onDataExtracted, onClose }: VoiceAssistantProps
       if (speechServiceRef.current) {
         speechServiceRef.current.stop();
       }
+      // Cancel any ongoing speech synthesis
+      if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+      }
     };
   }, []);
 
   /**
    * Ask a question to the user using text-to-speech
+   * Only speaks the question once per question index
    * @param index - Index of the question to ask
    */
   const askQuestion = (index: number) => {
@@ -83,17 +93,35 @@ export const VoiceAssistant = ({ onDataExtracted, onClose }: VoiceAssistantProps
       return;
     }
 
+    // Update both state and ref to keep them in sync
+    currentQuestionIndexRef.current = index;
     setQuestionIndex(index);
     setCurrentQuestion(questions[index]);
     setTranscript("");
+    setAiResponse(""); // Clear previous AI response
+    isProcessingAnswerRef.current = false; // Reset processing flag
 
-    // Use browser's text-to-speech API
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(questions[index]);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-      speechSynthesis.speak(utterance);
+    // Only speak the question if it hasn't been spoken before
+    if (!spokenQuestionsRef.current.has(index)) {
+      // Use browser's text-to-speech API
+      if ('speechSynthesis' in window) {
+        // Cancel any ongoing speech
+        speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(questions[index]);
+        utterance.rate = 0.9;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+        
+        // Mark this question as spoken when speech ends
+        utterance.onend = () => {
+          spokenQuestionsRef.current.add(index);
+        };
+        
+        speechSynthesis.speak(utterance);
+      }
+      // Mark as spoken even if speech synthesis is not available
+      spokenQuestionsRef.current.add(index);
     }
   };
 
@@ -107,8 +135,8 @@ export const VoiceAssistant = ({ onDataExtracted, onClose }: VoiceAssistantProps
       (result) => {
         setTranscript(result.transcript);
         
-        // If final result, process it
-        if (result.isFinal && result.transcript.trim()) {
+        // If final result, process it (only if not already processing)
+        if (result.isFinal && result.transcript.trim() && !isProcessingAnswerRef.current) {
           processAnswer(result.transcript);
         }
       },
@@ -135,23 +163,76 @@ export const VoiceAssistant = ({ onDataExtracted, onClose }: VoiceAssistantProps
       speechServiceRef.current.stop();
       setIsListening(false);
       
-      // Process the transcript if there's any
-      if (transcript.trim()) {
+      // Process the transcript if there's any and not already processing
+      if (transcript.trim() && !isProcessingAnswerRef.current) {
         processAnswer(transcript);
       }
     }
   };
 
   /**
+   * Get AI response about the question and user's answer
+   * @param question - The question that was asked
+   * @param answer - User's answer
+   * @returns AI response string
+   */
+  const getAIResponse = async (question: string, answer: string): Promise<string> => {
+    try {
+      const messages = [
+        {
+          role: "system" as const,
+          content: `You are a helpful assistant for a lost and found platform. The user is answering questions about a lost or found item. 
+Provide a brief, friendly confirmation or clarification about their answer. Keep your response concise (1-2 sentences). 
+If the answer seems incomplete or unclear, gently ask for clarification. Otherwise, acknowledge their answer positively.`
+        },
+        {
+          role: "user" as const,
+          content: `Question: "${question}"\n\nUser's Answer: "${answer}"\n\nProvide a brief response about this answer.`
+        }
+      ];
+
+      const response = await openRouterChat(messages);
+      return response.trim();
+    } catch (error) {
+      console.error("Error getting AI response:", error);
+      return ""; // Return empty string if AI fails
+    }
+  };
+
+  /**
    * Process user's answer and extract relevant information
+   * Also gets AI response about the question and answer
    * @param answer - User's voice transcript
    */
   const processAnswer = async (answer: string) => {
-    if (!answer.trim()) return;
+    if (!answer.trim() || isProcessingAnswerRef.current) return;
 
+    // Set processing flag to prevent duplicate processing
+    isProcessingAnswerRef.current = true;
     setIsProcessing(true);
+    setAiResponse(""); // Clear previous AI response
     
     try {
+      // Use ref to get current question index to avoid stale closure
+      const currentIndex = currentQuestionIndexRef.current;
+      const currentQ = questions[currentIndex];
+      
+      // Get AI response about the question and answer
+      const aiResponseText = await getAIResponse(currentQ, answer);
+      if (aiResponseText) {
+        setAiResponse(aiResponseText);
+        
+        // Speak the AI response
+        if ('speechSynthesis' in window) {
+          speechSynthesis.cancel(); // Cancel any ongoing speech
+          const utterance = new SpeechSynthesisUtterance(aiResponseText);
+          utterance.rate = 0.9;
+          utterance.pitch = 1;
+          utterance.volume = 1;
+          speechSynthesis.speak(utterance);
+        }
+      }
+
       // Extract structured data from the answer using AI
       const extractedData = await extractItemDataFromVoice(answer);
       
@@ -164,7 +245,6 @@ export const VoiceAssistant = ({ onDataExtracted, onClose }: VoiceAssistantProps
       }
 
       // Map answer to current question
-      const currentQ = questions[questionIndex];
       let newData: Partial<VoiceItemData> = {};
 
       // Extract information based on current question
@@ -208,15 +288,19 @@ export const VoiceAssistant = ({ onDataExtracted, onClose }: VoiceAssistantProps
         ...extractedData,
       }));
 
-      // Move to next question after a short delay
+      // Move to next question after AI response is spoken (wait a bit longer)
+      // Use ref to get the next index to avoid stale closure
       setTimeout(() => {
-        askQuestion(questionIndex + 1);
+        const nextIndex = currentQuestionIndexRef.current + 1;
+        askQuestion(nextIndex);
         setIsProcessing(false);
-      }, 1500);
+        isProcessingAnswerRef.current = false;
+      }, 3000); // Increased delay to allow AI response to be spoken
     } catch (error) {
       console.error("Error processing answer:", error);
       toast.error("Error processing your answer. Please try again.");
       setIsProcessing(false);
+      isProcessingAnswerRef.current = false;
     }
   };
 
@@ -303,6 +387,17 @@ export const VoiceAssistant = ({ onDataExtracted, onClose }: VoiceAssistantProps
           <div className="bg-background border p-4 rounded-lg">
             <p className="text-sm text-muted-foreground mb-1">Your response:</p>
             <p className="text-base">{transcript}</p>
+          </div>
+        )}
+
+        {/* AI Response Display */}
+        {aiResponse && (
+          <div className="bg-primary/10 border border-primary/20 p-4 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Volume2 className="h-4 w-4 text-primary" />
+              <p className="text-sm font-semibold text-primary">AI Response:</p>
+            </div>
+            <p className="text-base text-foreground">{aiResponse}</p>
           </div>
         )}
 
