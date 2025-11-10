@@ -5,14 +5,22 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import heroImage from "@/assets/hero-bg.jpg";
-import { Search, Upload, Bell, Shield, Users, Clock, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { Search, Upload, Bell, Shield, Users, Clock, ChevronLeft, ChevronRight, Star, AlertCircle, Heart } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { HeroSection } from "@/components/hero-section-dark";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const Index = () => {
   const [darkMode, setDarkMode] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [showGetStartedDialog, setShowGetStartedDialog] = useState(false);
   const navigate = useNavigate();
   const { scrollYProgress } = useScroll();
   const heroParallax = useTransform(scrollYProgress, [0, 0.3], [0, -40]);
@@ -95,6 +103,27 @@ const Index = () => {
     localStorage.setItem("theme", !darkMode ? "dark" : "light");
   };
 
+  const handleGetStarted = () => {
+    if (user) {
+      // Show dialog if signed in
+      setShowGetStartedDialog(true);
+    } else {
+      // Navigate to signup if not signed in
+      navigate("/auth");
+    }
+  };
+
+  const handleDialogOption = (option: "lost" | "found" | "post") => {
+    setShowGetStartedDialog(false);
+    if (option === "lost") {
+      navigate("/lost");
+    } else if (option === "found") {
+      navigate("/found");
+    } else {
+      navigate("/post");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background relative">
       {/* Full page gradient background */}
@@ -117,7 +146,7 @@ const Index = () => {
         }}
         description="BackTrack helps students report, discover, and recover belongings with a simple, trustworthy workflow."
         ctaText="Get Started"
-        ctaHref="#"
+        ctaOnClick={handleGetStarted}
         bottomImage={{
           light: heroImage,
           dark: heroImage
@@ -313,12 +342,71 @@ const Index = () => {
           >
             <h3 className="text-3xl md:text-4xl font-bold mb-3 text-white">Ready to get started?</h3>
             <p className="opacity-90 mb-8 text-white/90">Join BackTrack and help reunite items with their owners today.</p>
-            <Button size="lg" onClick={() => navigate(user ? "/post" : "/auth")} className="bg-white text-gray-600 hover:bg-white/90 dark:bg-white dark:text-gray-500">
-              {user ? "Post an Item" : "Create an account"}
+            <Button size="lg" onClick={handleGetStarted} className="bg-white text-gray-600 hover:bg-white/90 dark:bg-white dark:text-gray-500">
+              {user ? "Get Started" : "Create an account"}
             </Button>
           </motion.div>
         </div>
       </section>
+
+      {/* Get Started Dialog */}
+      <Dialog open={showGetStartedDialog} onOpenChange={setShowGetStartedDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center">What would you like to do?</DialogTitle>
+            <DialogDescription className="text-center">
+              Choose an option to get started
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <Button
+              onClick={() => handleDialogOption("lost")}
+              variant="outline"
+              className="h-auto p-6 flex flex-col items-start gap-2 hover:bg-primary/5 hover:border-primary/50 transition-all"
+            >
+              <div className="flex items-center gap-3 w-full">
+                <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/20">
+                  <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="font-semibold text-lg">You have lost?</div>
+                  <div className="text-sm text-muted-foreground">Search for your lost items</div>
+                </div>
+              </div>
+            </Button>
+            <Button
+              onClick={() => handleDialogOption("found")}
+              variant="outline"
+              className="h-auto p-6 flex flex-col items-start gap-2 hover:bg-primary/5 hover:border-primary/50 transition-all"
+            >
+              <div className="flex items-center gap-3 w-full">
+                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/20">
+                  <Search className="h-5 w-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="font-semibold text-lg">You have found something?</div>
+                  <div className="text-sm text-muted-foreground">Report a found item</div>
+                </div>
+              </div>
+            </Button>
+            <Button
+              onClick={() => handleDialogOption("post")}
+              variant="outline"
+              className="h-auto p-6 flex flex-col items-start gap-2 hover:bg-primary/5 hover:border-primary/50 transition-all"
+            >
+              <div className="flex items-center gap-3 w-full">
+                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/20">
+                  <Heart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="font-semibold text-lg">Want to help by posting?</div>
+                  <div className="text-sm text-muted-foreground">Post a lost or found item</div>
+                </div>
+              </div>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
