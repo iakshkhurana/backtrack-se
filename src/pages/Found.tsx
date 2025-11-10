@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
 const Found = () => {
-  const [darkMode, setDarkMode] = useState(true);
+  // Default to light mode
+  const [darkMode, setDarkMode] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [items, setItems] = useState<any[]>([]);
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
@@ -17,13 +18,13 @@ const Found = () => {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "light") {
-      setDarkMode(false);
-      document.documentElement.classList.remove("dark");
-    } else {
-      // Default to dark mode
+    if (savedTheme === "dark") {
       setDarkMode(true);
       document.documentElement.classList.add("dark");
+    } else {
+      // Default to light mode
+      setDarkMode(false);
+      document.documentElement.classList.remove("dark");
     }
 
     supabase.auth.getSession().then(({ data: { session } }) => {

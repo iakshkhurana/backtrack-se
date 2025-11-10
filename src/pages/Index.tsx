@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/dialog";
 
 const Index = () => {
-  const [darkMode, setDarkMode] = useState(true);
+  // Default to light mode
+  const [darkMode, setDarkMode] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [showGetStartedDialog, setShowGetStartedDialog] = useState(false);
@@ -54,13 +55,13 @@ const Index = () => {
   useEffect(() => {
     // Check for saved theme preference
     const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "light") {
-      setDarkMode(false);
-      document.documentElement.classList.remove("dark");
-    } else {
-      // Default to dark mode
+    if (savedTheme === "dark") {
       setDarkMode(true);
       document.documentElement.classList.add("dark");
+    } else {
+      // Default to light mode
+      setDarkMode(false);
+      document.documentElement.classList.remove("dark");
     }
 
     // Check for existing session

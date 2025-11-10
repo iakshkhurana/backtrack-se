@@ -16,7 +16,30 @@ export const FollowerPointerCard = ({
   const y = useMotionValue(0);
   const ref = React.useRef<HTMLDivElement>(null);
   const [rect, setRect] = useState<DOMRect | null>(null);
-  const [isInside, setIsInside] = useState<boolean>(false); // Add this line
+  const [isInside, setIsInside] = useState<boolean>(false);
+  // Track if device is desktop (has precise pointing device like mouse/trackpad)
+  const [isDesktop, setIsDesktop] = useState<boolean>(false);
+
+  /**
+   * Check if device is desktop (has precise pointing device)
+   * Only show following-pointer on desktop devices, not on mobile/touch devices
+   */
+  useEffect(() => {
+    // Check if device has precise pointing device (mouse/trackpad)
+    const mediaQuery = window.matchMedia('(pointer: fine)');
+    setIsDesktop(mediaQuery.matches);
+
+    // Listen for changes (e.g., when device orientation changes)
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsDesktop(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (ref.current) {
@@ -40,19 +63,24 @@ export const FollowerPointerCard = ({
   const handleMouseEnter = () => {
     setIsInside(true);
   };
+  
+  /**
+   * Only show following-pointer on desktop devices
+   * On mobile/touch devices, use default cursor behavior
+   */
   return (
     <div
-      onMouseLeave={handleMouseLeave}
-      onMouseEnter={handleMouseEnter}
-      onMouseMove={handleMouseMove}
+      onMouseLeave={isDesktop ? handleMouseLeave : undefined}
+      onMouseEnter={isDesktop ? handleMouseEnter : undefined}
+      onMouseMove={isDesktop ? handleMouseMove : undefined}
       style={{
-        cursor: "none",
+        cursor: isDesktop ? "none" : "default",
       }}
       ref={ref}
-      className={cn("relative [&_*]:cursor-none", className)}
+      className={cn("relative", isDesktop ? "[&_*]:cursor-none" : "", className)}
     >
       <AnimatePresence>
-        {isInside ? <FollowPointer x={x} y={y} title={title} /> : null}
+        {isDesktop && isInside ? <FollowPointer x={x} y={y} title={title} /> : null}
       </AnimatePresence>
       {children}
     </div>

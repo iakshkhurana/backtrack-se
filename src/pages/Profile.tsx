@@ -13,7 +13,8 @@ import { useNavigate } from "react-router-dom";
 import { LoaderOne } from "@/components/ui/loader";
 
 const Profile = () => {
-  const [darkMode, setDarkMode] = useState(true);
+  // Default to light mode
+  const [darkMode, setDarkMode] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -28,12 +29,13 @@ const Profile = () => {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "light") {
-      setDarkMode(false);
-      document.documentElement.classList.remove("dark");
-    } else {
+    if (savedTheme === "dark") {
       setDarkMode(true);
       document.documentElement.classList.add("dark");
+    } else {
+      // Default to light mode
+      setDarkMode(false);
+      document.documentElement.classList.remove("dark");
     }
 
     setLoading(true);

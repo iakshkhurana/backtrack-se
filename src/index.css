@@ -114,12 +114,19 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    cursor: none !important;
   }
 
-  /* Hide cursor on all elements when following pointer is active */
-  * {
-    cursor: none !important;
+  /* Hide cursor on desktop devices only (devices with precise pointing devices like mouse/trackpad) */
+  /* On mobile/touch devices, use default cursor behavior */
+  @media (pointer: fine) {
+    body {
+      cursor: none !important;
+    }
+
+    /* Hide cursor on all elements when following pointer is active (desktop only) */
+    * {
+      cursor: none !important;
+    }
   }
 }
 
