@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { FollowerPointerCard } from "@/components/ui/following-pointer";
 
 const Index = () => {
   const [darkMode, setDarkMode] = useState(true);
@@ -123,7 +124,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-x-hidden">
+    <FollowerPointerCard className="min-h-screen bg-background relative overflow-x-hidden">
       {/* Full page gradient background */}
       <div className="fixed inset-0 z-0 bg-purple-950/10 dark:bg-purple-950/10 bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
       
@@ -404,7 +405,7 @@ const Index = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </FollowerPointerCard>
   );
 };
 
