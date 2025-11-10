@@ -1,4 +1,4 @@
-import { Moon, Sun, LogOut } from "lucide-react";
+import { Moon, Sun, LogOut, User, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -100,6 +100,23 @@ export const Navbar = ({ darkMode, toggleDarkMode, user, position = "fixed", cus
           
           {/* Right side - icons and sign in button */}
           <div className="flex items-center gap-2">
+            {/* GitHub link */}
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className="rounded-full hover:bg-muted hover:text-foreground transition-colors"
+              aria-label="GitHub Repository"
+            >
+              <a 
+                href="https://github.com/iakshkhurana/backtrack-se" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Github className="h-5 w-5" />
+              </a>
+            </Button>
+            
             {/* Theme toggle button */}
             <Button
               variant="ghost"
@@ -113,14 +130,27 @@ export const Navbar = ({ darkMode, toggleDarkMode, user, position = "fixed", cus
             
             {/* Sign out or Sign in button */}
             {user ? (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleSignOut}
-                className="rounded-full hover:bg-muted hover:text-foreground transition-colors"
-              >
-                <LogOut className="h-5 w-5" />
-              </Button>
+              <>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => handleNavigate("/profile")}
+                  className={`rounded-full hover:bg-muted hover:text-foreground transition-all duration-200 ${
+                    location.pathname === "/profile" ? "bg-primary/20 text-primary font-semibold" : ""
+                  }`}
+                  aria-label="Profile"
+                >
+                  <User className="h-5 w-5" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleSignOut}
+                  className="rounded-full hover:bg-muted hover:text-foreground transition-colors"
+                >
+                  <LogOut className="h-5 w-5" />
+                </Button>
+              </>
             ) : (
               <Button 
                 onClick={() => handleNavigate("/auth")}

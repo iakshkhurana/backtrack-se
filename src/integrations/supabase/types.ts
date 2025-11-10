@@ -17,6 +17,7 @@ export type Database = {
       items: {
         Row: {
           category: Database["public"]["Enums"]["item_category"]
+          claim_status: Database["public"]["Enums"]["item_claim_status"]
           contact_info: string | null
           created_at: string | null
           date_reported: string | null
@@ -31,6 +32,7 @@ export type Database = {
         }
         Insert: {
           category: Database["public"]["Enums"]["item_category"]
+          claim_status?: Database["public"]["Enums"]["item_claim_status"]
           contact_info?: string | null
           created_at?: string | null
           date_reported?: string | null
@@ -45,6 +47,7 @@ export type Database = {
         }
         Update: {
           category?: Database["public"]["Enums"]["item_category"]
+          claim_status?: Database["public"]["Enums"]["item_claim_status"]
           contact_info?: string | null
           created_at?: string | null
           date_reported?: string | null
@@ -59,12 +62,221 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          id: string
+          full_name: string | null
+          bio: string | null
+          avatar_url: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          full_name?: string | null
+          bio?: string | null
+          avatar_url?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          full_name?: string | null
+          bio?: string | null
+          avatar_url?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      claims: {
+        Row: {
+          id: string
+          item_id: string
+          claimant_id: string
+          verification_details: string | null
+          status: Database["public"]["Enums"]["claim_status"]
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          item_id: string
+          claimant_id: string
+          verification_details?: string | null
+          status?: Database["public"]["Enums"]["claim_status"]
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          item_id?: string
+          claimant_id?: string
+          verification_details?: string | null
+          status?: Database["public"]["Enums"]["claim_status"]
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      conversations: {
+        Row: {
+          id: string
+          item_id: string
+          participant1_id: string
+          participant2_id: string
+          last_message_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          item_id: string
+          participant1_id: string
+          participant2_id: string
+          last_message_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          item_id?: string
+          participant1_id?: string
+          participant2_id?: string
+          last_message_at?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          id: string
+          conversation_id: string
+          sender_id: string
+          receiver_id: string
+          content: string
+          is_read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          sender_id: string
+          receiver_id: string
+          content: string
+          is_read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          conversation_id?: string
+          sender_id?: string
+          receiver_id?: string
+          content?: string
+          is_read?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: Database["public"]["Enums"]["notification_type"]
+          title: string
+          message: string
+          link: string | null
+          is_read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: Database["public"]["Enums"]["notification_type"]
+          title: string
+          message: string
+          link?: string | null
+          is_read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          title?: string
+          message?: string
+          link?: string | null
+          is_read?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      matches: {
+        Row: {
+          id: string
+          lost_item_id: string
+          found_item_id: string
+          confidence_score: number
+          match_reasons: string[] | null
+          status: Database["public"]["Enums"]["match_status"]
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          lost_item_id: string
+          found_item_id: string
+          confidence_score: number
+          match_reasons?: string[] | null
+          status?: Database["public"]["Enums"]["match_status"]
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          lost_item_id?: string
+          found_item_id?: string
+          confidence_score?: number
+          match_reasons?: string[] | null
+          status?: Database["public"]["Enums"]["match_status"]
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      user_dashboard_stats: {
+        Row: {
+          user_id: string
+          lost_items_count: number | null
+          found_items_count: number | null
+          successful_claims_count: number | null
+          unread_messages_count: number | null
+          unread_notifications_count: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      get_or_create_conversation: {
+        Args: {
+          p_item_id: string
+          p_user1_id: string
+          p_user2_id: string
+        }
+        Returns: string
+      }
+      get_unread_notification_count: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: number
+      }
+      get_unread_message_count: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: number
+      }
     }
     Enums: {
       item_category:
@@ -76,6 +288,11 @@ export type Database = {
         | "clothing"
         | "other"
       item_status: "lost" | "found"
+      claim_status: "pending" | "approved" | "rejected" | "returned"
+      item_claim_status: "open" | "pending" | "claimed" | "returned" | "closed"
+      notification_type: "claim" | "message" | "match" | "status" | "system"
+      match_status: "pending" | "reviewed" | "confirmed" | "rejected"
+      user_role: "user" | "moderator" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -213,6 +430,11 @@ export const Constants = {
         "other",
       ],
       item_status: ["lost", "found"],
+      claim_status: ["pending", "approved", "rejected", "returned"],
+      item_claim_status: ["open", "pending", "claimed", "returned", "closed"],
+      notification_type: ["claim", "message", "match", "status", "system"],
+      match_status: ["pending", "reviewed", "confirmed", "rejected"],
+      user_role: ["user", "moderator", "admin"],
     },
   },
 } as const

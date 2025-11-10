@@ -9,9 +9,12 @@ import Auth from "./pages/Auth";
 import Lost from "./pages/Lost";
 import Found from "./pages/Found";
 import PostItem from "./pages/PostItem";
+import Profile from "./pages/Profile";
+import VerifyTables from "./pages/VerifyTables";
 import NotFound from "./pages/NotFound";
 import { motion, AnimatePresence } from "framer-motion";
 import { AIChat } from "@/components/AIChat";
+import { FollowerPointerCard } from "@/components/ui/following-pointer";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +73,8 @@ const AnimatedRoutes = () => {
           <Route path="/lost" element={<Lost />} />
           <Route path="/found" element={<Found />} />
           <Route path="/post" element={<PostItem />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/verify-tables" element={<VerifyTables />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -112,10 +117,12 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          {/* AnimatedRoutes handles smooth page transitions */}
-          <AnimatedRoutes />
-          {/* AI Chat - available on all pages */}
-          <AIChat />
+          <FollowerPointerCard className="min-h-screen">
+            {/* AnimatedRoutes handles smooth page transitions */}
+            <AnimatedRoutes />
+            {/* AI Chat - available on all pages */}
+            <AIChat />
+          </FollowerPointerCard>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

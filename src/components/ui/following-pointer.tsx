@@ -28,6 +28,7 @@ export const FollowerPointerCard = ({
     if (rect) {
       const scrollX = window.scrollX;
       const scrollY = window.scrollY;
+      // Position at exact cursor location (will be centered by transform)
       x.set(e.clientX - rect.left + scrollX);
       y.set(e.clientY - rect.top + scrollY);
     }
@@ -48,10 +49,10 @@ export const FollowerPointerCard = ({
         cursor: "none",
       }}
       ref={ref}
-      className={cn("relative", className)}
+      className={cn("relative [&_*]:cursor-none", className)}
     >
       <AnimatePresence>
-        {isInside && <FollowPointer x={x} y={y} title={title} />}
+        {isInside ? <FollowPointer x={x} y={y} title={title} /> : null}
       </AnimatePresence>
       {children}
     </div>
@@ -78,11 +79,13 @@ export const FollowPointer = ({
   ];
   return (
     <motion.div
-      className="absolute z-50 h-4 w-4 rounded-full"
+      className="absolute z-[100] rounded-full -translate-x-1/2 -translate-y-1/2"
       style={{
         top: y,
         left: x,
         pointerEvents: "none",
+        width: "16px",
+        height: "16px",
       }}
       initial={{
         scale: 1,
@@ -102,7 +105,7 @@ export const FollowPointer = ({
         fill="currentColor"
         strokeWidth="1"
         viewBox="0 0 16 16"
-        className="h-6 w-6 -translate-x-[12px] -translate-y-[10px] -rotate-[70deg] transform stroke-sky-600 text-sky-500"
+        className="h-6 w-6 -translate-x-[12px] -translate-y-[12px] -rotate-[70deg] transform stroke-sky-600 text-sky-500"
         height="1em"
         width="1em"
         xmlns="http://www.w3.org/2000/svg"

@@ -114,6 +114,12 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    cursor: none !important;
+  }
+
+  /* Hide cursor on all elements when following pointer is active */
+  * {
+    cursor: none !important;
   }
 }
 
