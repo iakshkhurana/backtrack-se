@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Sparkles } from "lucide-react";
+import { analyzeItemImage } from "@/services/openrouter";
 
 const itemSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters").max(100),
@@ -27,6 +28,7 @@ const PostItem = () => {
   const [darkMode, setDarkMode] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   
@@ -94,6 +96,43 @@ const PostItem = () => {
   const removeImage = () => {
     setUploadedImage(null);
     setImagePreview(null);
+  };
+
+  /**
+   * Analyze uploaded image using AI to auto-fill form fields
+   * Uses vision model to extract item details from the image
+   */
+  const handleAnalyzeImage = async () => {
+    if (!imagePreview) {
+      toast.error("Please upload an image first");
+      return;
+    }
+
+    setAnalyzing(true);
+    try {
+      const result = await analyzeItemImage(imagePreview);
+      
+      if (!result) {
+        toast.error("Failed to analyze image. Please fill the form manually.");
+        return;
+      }
+
+      // Auto-fill form fields with AI analysis results
+      setFormData((prev) => ({
+        ...prev,
+        title: result.title || prev.title,
+        description: result.description || prev.description,
+        category: result.category || prev.category,
+        location: result.location || prev.location,
+      }));
+
+      toast.success("Image analyzed! Form fields have been auto-filled.");
+    } catch (error: any) {
+      console.error("Error analyzing image:", error);
+      toast.error("Error analyzing image. Please try again or fill the form manually.");
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   const uploadImage = async (): Promise<string | null> => {
@@ -268,15 +307,27 @@ const PostItem = () => {
                         alt="Preview" 
                         className="w-full h-48 object-cover rounded-lg border"
                       />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2"
-                        onClick={removeImage}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                      <div className="absolute top-2 right-2 flex gap-2">
+                        <Button
+                          type="button"
+                          variant="default"
+                          size="icon"
+                          onClick={handleAnalyzeImage}
+                          disabled={analyzing}
+                          className="bg-primary hover:bg-primary/90"
+                          title="Analyze image with AI"
+                        >
+                          <Sparkles className={`h-4 w-4 ${analyzing ? 'animate-spin' : ''}`} />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          onClick={removeImage}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   ) : (
                     <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors">
