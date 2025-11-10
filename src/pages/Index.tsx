@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import heroImage from "@/assets/hero-bg.jpg";
 import { Search, Upload, Bell, Shield, Users, Clock, ChevronLeft, ChevronRight, Star, AlertCircle, Heart } from "lucide-react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { HeroSection } from "@/components/hero-section-dark";
 import {
   Dialog,
@@ -22,8 +22,6 @@ const Index = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [showGetStartedDialog, setShowGetStartedDialog] = useState(false);
   const navigate = useNavigate();
-  const { scrollYProgress } = useScroll();
-  const heroParallax = useTransform(scrollYProgress, [0, 0.3], [0, -40]);
 
   // Testimonials data
   const testimonials = [
@@ -125,15 +123,10 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-background relative overflow-x-hidden">
       {/* Full page gradient background */}
       <div className="fixed inset-0 z-0 bg-purple-950/10 dark:bg-purple-950/10 bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
       
-      {/* Scroll progress bar */}
-      <motion.div 
-        className="fixed left-0 right-0 top-0 h-1 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 origin-left z-[60]"
-        style={{ scaleX: scrollYProgress }}
-      />
       <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} user={user} position="fixed" />
 
       {/* Hero Section - Full Page - Starts from top */}
@@ -331,18 +324,22 @@ const Index = () => {
       <section className="py-14 relative z-10">
         <div className="container mx-auto px-4">
           <motion.div 
-            className="rounded-2xl border border-border p-10 md:p-12 text-center"
+            className="rounded-2xl border p-10 md:p-12 text-center text-white"
             style={{
-              background: 'linear-gradient(to right, #0892d0 0%, #4b0082 100%)'
+              background: darkMode 
+                ? '#0A0A1A' 
+                : 'linear-gradient(to right, #0892d0 0%, #4b0082 100%)',
+              borderColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : undefined,
+              borderWidth: darkMode ? '1px' : undefined
             }}
             initial={{ opacity: 0, scale: 0.98 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, amount: 0.4 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            <h3 className="text-3xl md:text-4xl font-bold mb-3 text-white">Ready to get started?</h3>
-            <p className="opacity-90 mb-8 text-white/90">Join BackTrack and help reunite items with their owners today.</p>
-            <Button size="lg" onClick={handleGetStarted} className="bg-white text-gray-600 hover:bg-white/90 dark:bg-white dark:text-gray-500">
+            <h3 className="text-3xl md:text-4xl font-bold mb-3">Ready to get started?</h3>
+            <p className="opacity-90 mb-8">Join BackTrack and help reunite items with their owners today.</p>
+            <Button size="lg" onClick={handleGetStarted} className="bg-white text-black hover:bg-white/90 dark:text-black">
               {user ? "Get Started" : "Create an account"}
             </Button>
           </motion.div>
