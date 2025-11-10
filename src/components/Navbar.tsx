@@ -50,7 +50,7 @@ export const Navbar = ({ darkMode, toggleDarkMode, user, position = "fixed", cus
           <div className="flex items-center gap-8">
             {/* Logo - white text in dark mode, blue gradient in light mode */}
             <h1 
-              className="text-xl font-bold bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent dark:bg-none dark:text-foreground cursor-pointer hover:opacity-80 transition-opacity"
+              className="text-xl font-bold font-dancing-script bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent dark:bg-none dark:text-foreground cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => handleNavigate("/")}
             >
               BackTrack

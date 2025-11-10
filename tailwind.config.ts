@@ -61,6 +61,14 @@ export default {
         "gradient-hero": "var(--gradient-hero)",
         "gradient-card": "var(--gradient-card)",
       },
+      fontFamily: {
+        'comic-relief': ['Comic Relief', 'cursive'],
+        'dancing-script': ['Dancing Script', 'cursive'],
+        'inter': ['Inter', 'sans-serif'],
+        'playwrite-au-qld': ['Playwrite AU QLD', 'cursive'],
+        'playwrite-hu': ['Playwrite HU', 'cursive'],
+        'poppins': ['Poppins', 'sans-serif'],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
