@@ -84,7 +84,7 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
         <section className="relative max-w-full mx-auto z-1">
           <RetroGrid {...gridOptions} />
           <div className="max-w-screen-xl z-10 mx-auto px-4 pt-28 pb-28 gap-12 md:px-8">
-            <div className="space-y-5 max-w-3xl leading-0 lg:leading-5 mx-auto text-center">
+            <div className="space-y-5 max-w-3xl leading-0 lg:leading-5 mx-auto text-center select-none">
               <h1 className="text-sm text-gray-600 dark:text-gray-400 group font-geist mx-auto px-5 py-2 bg-gradient-to-tr from-zinc-300/20 via-gray-400/20 to-transparent dark:from-zinc-300/5 dark:via-gray-400/5 border-[2px] border-black/5 dark:border-white/5 rounded-3xl w-fit">
                 {title}
                 <ChevronRight className="inline w-4 h-4 ml-2 group-hover:translate-x-1 duration-300" />

@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CategoryBadge } from "./CategoryBadge";
-import { MapPin, Calendar, User, Trash2, CheckCircle } from "lucide-react";
+import { MapPin, Calendar, User, Trash2, CheckCircle, Maximize2, X } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,6 +34,8 @@ export const ItemCard = ({ item, currentUserId, onDelete }: ItemCardProps) => {
   const [showClaimDialog, setShowClaimDialog] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [verificationDetails, setVerificationDetails] = useState("");
+  // State for full-screen image viewer
+  const [showImageFullscreen, setShowImageFullscreen] = useState(false);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -98,15 +100,42 @@ export const ItemCard = ({ item, currentUserId, onDelete }: ItemCardProps) => {
   const isOwner = currentUserId && currentUserId === item.user_id;
   const canClaim = currentUserId && !isOwner && item.status === "found";
   
+  /**
+   * Parse contact info to extract name and phone number
+   * Format: "NAME-PHONENUMBER" or just phone/email
+   */
+  const parseContactInfo = (contactInfo: string | null) => {
+    if (!contactInfo) return { name: null, contact: null };
+    
+    // Check if format is "NAME-PHONENUMBER"
+    if (contactInfo.includes('-')) {
+      const parts = contactInfo.split('-');
+      if (parts.length >= 2) {
+        const name = parts.slice(0, -1).join('-').trim();
+        const phone = parts[parts.length - 1].trim();
+        return { name, contact: phone };
+      }
+    }
+    
+    // If no dash, treat as single contact (phone or email)
+    return { name: null, contact: contactInfo };
+  };
+
+  const contactInfo = parseContactInfo(item.contact_info);
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-gradient-card border-border/50">
       {item.image_url && (
-        <div className="h-48 overflow-hidden">
+        <div className="h-48 overflow-hidden relative group cursor-pointer" onClick={() => setShowImageFullscreen(true)}>
           <img 
             src={item.image_url} 
             alt={item.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
+          {/* Overlay with expand icon on hover */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+            <Maximize2 className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </div>
         </div>
       )}
       <CardHeader>
@@ -161,8 +190,15 @@ export const ItemCard = ({ item, currentUserId, onDelete }: ItemCardProps) => {
         </div>
         {item.contact_info && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <User className="h-4 w-4" />
-            <span>{item.contact_info}</span>
+            <User className="h-4 w-4 flex-shrink-0" />
+            <div className="flex flex-col gap-0.5">
+              {contactInfo.name && (
+                <span className="font-medium">{contactInfo.name}</span>
+              )}
+              {contactInfo.contact && (
+                <span className={contactInfo.name ? "text-xs" : ""}>{contactInfo.contact}</span>
+              )}
+            </div>
           </div>
         )}
         {canClaim && (
@@ -206,6 +242,33 @@ export const ItemCard = ({ item, currentUserId, onDelete }: ItemCardProps) => {
               {claiming ? "Submitting..." : "Submit Claim"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Full-Screen Image Viewer Dialog */}
+      <Dialog open={showImageFullscreen} onOpenChange={setShowImageFullscreen}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none">
+          <div className="relative w-full h-full flex items-center justify-center">
+            {/* Close button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowImageFullscreen(false)}
+              className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white border border-white/20"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+            
+            {/* Full-screen image */}
+            {item.image_url && (
+              <img 
+                src={item.image_url} 
+                alt={item.title}
+                className="max-w-full max-h-full object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </Card>

@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Upload, X, Sparkles, Mic } from "lucide-react";
+import { Upload, X, Sparkles, Mic, Maximize2 } from "lucide-react";
 import { analyzeItemImage } from "@/services/openrouter";
 import { VoiceAssistant } from "@/components/VoiceAssistant";
 import { VoiceItemData } from "@/services/speech-to-text";
@@ -35,6 +36,8 @@ const PostItem = () => {
   const [showVoiceAssistant, setShowVoiceAssistant] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  // State for full-screen image viewer
+  const [showImageFullscreen, setShowImageFullscreen] = useState(false);
   
   const [formData, setFormData] = useState({
     title: "",
@@ -333,29 +336,40 @@ const PostItem = () => {
                 <Label htmlFor="contact_info">Contact Information *</Label>
                 <Input
                   id="contact_info"
-                  placeholder="Email or phone number"
+                  placeholder="Name-PhoneNumber (e.g., AKSH KHURANA-8058501004) or Email/Phone"
                   value={formData.contact_info}
                   onChange={(e) => setFormData({ ...formData, contact_info: e.target.value })}
                   required
                 />
+                <p className="text-xs text-muted-foreground">
+                  Format: Name-PhoneNumber (e.g., AKSH KHURANA-8058501004) or just email/phone
+                </p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="image">Item Image (optional)</Label>
                 <div className="space-y-4">
                   {imagePreview ? (
-                    <div className="relative">
+                    <div className="relative group">
                       <img 
                         src={imagePreview} 
                         alt="Preview" 
-                        className="w-full h-48 object-cover rounded-lg border"
+                        className="w-full h-48 object-cover rounded-lg border cursor-pointer transition-transform duration-300 group-hover:scale-105"
+                        onClick={() => setShowImageFullscreen(true)}
                       />
-                      <div className="absolute top-2 right-2 flex gap-2">
+                      {/* Overlay with expand icon on hover */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center rounded-lg">
+                        <Maximize2 className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+                      <div className="absolute top-2 right-2 flex gap-2 z-10">
                         <Button
                           type="button"
                           variant="default"
                           size="icon"
-                          onClick={handleAnalyzeImage}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAnalyzeImage();
+                          }}
                           disabled={analyzing}
                           className="bg-primary hover:bg-primary/90"
                           title="Analyze image with AI"
@@ -366,7 +380,10 @@ const PostItem = () => {
                           type="button"
                           variant="destructive"
                           size="icon"
-                          onClick={removeImage}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeImage();
+                          }}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -400,6 +417,33 @@ const PostItem = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Full-Screen Image Viewer Dialog */}
+      <Dialog open={showImageFullscreen} onOpenChange={setShowImageFullscreen}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none">
+          <div className="relative w-full h-full flex items-center justify-center">
+            {/* Close button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowImageFullscreen(false)}
+              className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white border border-white/20"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+            
+            {/* Full-screen image */}
+            {imagePreview && (
+              <img 
+                src={imagePreview} 
+                alt="Preview" 
+                className="max-w-full max-h-full object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -14,7 +14,6 @@ import VerifyTables from "./pages/VerifyTables";
 import NotFound from "./pages/NotFound";
 import { motion, AnimatePresence } from "framer-motion";
 import { AIChat } from "@/components/AIChat";
-import { FollowerPointerCard } from "@/components/ui/following-pointer";
 
 const queryClient = new QueryClient();
 
@@ -117,12 +116,10 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <FollowerPointerCard className="min-h-screen">
-            {/* AnimatedRoutes handles smooth page transitions */}
-            <AnimatedRoutes />
-            {/* AI Chat - available on all pages */}
-            <AIChat />
-          </FollowerPointerCard>
+          {/* AnimatedRoutes handles smooth page transitions */}
+          <AnimatedRoutes />
+          {/* AI Chat - available on all pages */}
+          <AIChat />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
