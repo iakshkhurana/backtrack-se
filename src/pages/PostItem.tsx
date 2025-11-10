@@ -24,7 +24,7 @@ const itemSchema = z.object({
 
 const PostItem = () => {
   const navigate = useNavigate();
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
@@ -41,7 +41,11 @@ const PostItem = () => {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
+    if (savedTheme === "light") {
+      setDarkMode(false);
+      document.documentElement.classList.remove("dark");
+    } else {
+      // Default to dark mode
       setDarkMode(true);
       document.documentElement.classList.add("dark");
     }
@@ -160,10 +164,13 @@ const PostItem = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Full page gradient background */}
+      <div className="fixed inset-0 z-0 bg-purple-950/10 dark:bg-purple-950/10 bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
+      
       <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} user={user} />
       
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="container mx-auto px-4 py-8 max-w-2xl relative z-10">
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">Post an Item</CardTitle>

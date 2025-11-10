@@ -36,7 +36,7 @@ export const ShaderBackground = ({ className = "" }: { className?: string }) => 
         // direction of streaks (normalized)
         vec2 dir = normalize(vec2(1.0, -0.6));
 
-        // base color palette (purple/blue)
+        // base color palette (subtle white/light tones for dark blue theme)
         vec3 col = vec3(0.0);
 
         // Create multiple streaks by iterating and offsetting
@@ -61,8 +61,8 @@ export const ShaderBackground = ({ className = "" }: { className?: string }) => 
           float tail = smoothstep(-0.6, 0.2, along);
           intensity *= tail;
 
-          // color per streak
-          vec3 c = mix(vec3(0.18,0.44,1.0), vec3(0.58,0.28,0.98), fract(fi*0.137));
+          // color per streak - subtle white/light gray tones for dark blue background
+          vec3 c = mix(vec3(0.2,0.2,0.25), vec3(0.4,0.4,0.45), fract(fi*0.137));
           col += intensity * c;
         }
 

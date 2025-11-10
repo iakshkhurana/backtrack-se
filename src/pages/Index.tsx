@@ -5,21 +5,54 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import heroImage from "@/assets/hero-bg.jpg";
-import { Search, Upload, Bell, Shield, Users, Clock } from "lucide-react";
+import { Search, Upload, Bell, Shield, Users, Clock, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ShaderBackground } from "@/components/ShaderBackground";
+import { HeroSection } from "@/components/hero-section-dark";
 
 const Index = () => {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const navigate = useNavigate();
   const { scrollYProgress } = useScroll();
   const heroParallax = useTransform(scrollYProgress, [0, 0.3], [0, -40]);
 
+  // Testimonials data
+  const testimonials = [
+    {
+      quote: "With the new addition of AI features such as automated summaries and thematic suggestions, BackTrack has made it even faster to get to customer insights.",
+      user: "TrustRadius Verified User",
+      role: "Product Manager",
+      rating: "1,000+"
+    },
+    {
+      quote: "BackTrack's intuitive interface and powerful search capabilities have transformed how we handle lost and found items on campus. Highly recommended!",
+      user: "Campus Administrator",
+      role: "Student Services",
+      rating: "500+"
+    },
+    {
+      quote: "The real-time notifications and smart matching system saved me hours of work. BackTrack is a game-changer for campus operations.",
+      user: "Verified User",
+      role: "Operations Manager",
+      rating: "2,000+"
+    },
+    {
+      quote: "As a student, I love how easy it is to post and search for items. The AI assistant makes finding lost items so much faster!",
+      user: "Student User",
+      role: "Undergraduate",
+      rating: "100+"
+    }
+  ];
+
   useEffect(() => {
     // Check for saved theme preference
     const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
+    if (savedTheme === "light") {
+      setDarkMode(false);
+      document.documentElement.classList.remove("dark");
+    } else {
+      // Default to dark mode
       setDarkMode(true);
       document.documentElement.classList.add("dark");
     }
@@ -37,6 +70,25 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Auto-slide testimonials from right to left
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+    }, 5000); // Change testimonial every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [testimonials.length]);
+
+  // Navigate to previous testimonial
+  const handlePrevious = () => {
+    setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+
+  // Navigate to next testimonial
+  const handleNext = () => {
+    setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+  };
+
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
     document.documentElement.classList.toggle("dark");
@@ -44,56 +96,37 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Full page gradient background */}
+      <div className="fixed inset-0 z-0 bg-purple-950/10 dark:bg-purple-950/10 bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
+      
       {/* Scroll progress bar */}
       <motion.div 
-        className="fixed left-0 right-0 top-0 h-1 bg-primary origin-left z-[60]"
+        className="fixed left-0 right-0 top-0 h-1 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 origin-left z-[60]"
         style={{ scaleX: scrollYProgress }}
       />
-      <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} user={user} />
+      <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} user={user} position="absolute" />
 
-      {/* SaaS Hero */}
-      <section className="relative">
-        <ShaderBackground />
-        <div className="absolute -z-20 inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(124,58,237,0.18),transparent_45%),radial-gradient(ellipse_at_bottom_left,rgba(168,85,247,0.18),transparent_45%)]" />
-        <div className="container mx-auto px-4 py-20 md:py-28">
-          <div className="grid lg:grid-cols-2 gap-10 items-center">
-            <div>
-              <span className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground mb-4">Campus Lost & Found, reimagined</span>
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-                Lost something? <span className="text-primary">Find it fast.</span>
-              </h1>
-              <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl">
-                BackTrack helps students report, discover, and recover belongings with a simple, trustworthy workflow.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button size="lg" onClick={() => navigate("/lost")} className="shadow-sm">
-                  Browse Lost Items
-                </Button>
-                <Button size="lg" variant="outline" onClick={() => navigate("/found")}>
-                  Browse Found Items
-                </Button>
-              </div>
-              <div className="mt-6 flex items-center gap-6 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2"><Shield className="h-4 w-4" /> Verified posts</div>
-                <div className="flex items-center gap-2"><Clock className="h-4 w-4" /> Real-time updates</div>
-                <div className="flex items-center gap-2"><Users className="h-4 w-4" /> Student-first</div>
-              </div>
-            </div>
-            <div className="relative hidden lg:block">
-              <motion.div 
-                className="rounded-3xl overflow-hidden shadow-2xl"
-                style={{ y: heroParallax }}
-              >
-                <img src={heroImage} alt="BackTrack preview" className="w-full h-full object-cover aspect-[4/3]" />
-              </motion.div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero Section - Full Page */}
+      <div className="pt-20">
+        <HeroSection
+        title="Campus Lost & Found"
+        subtitle={{
+          regular: "Lost something? ",
+          gradient: "Find it fast."
+        }}
+        description="BackTrack helps students report, discover, and recover belongings with a simple, trustworthy workflow."
+        ctaText="Get Started"
+        ctaHref="#"
+        bottomImage={{
+          light: heroImage,
+          dark: heroImage
+        }}
+      />
+      </div>
 
       {/* Stats */}
-      <section className="container mx-auto px-4 pb-6 -mt-6 md:-mt-10">
+      <section className="container mx-auto px-4 pb-6 -mt-6 md:-mt-10 relative z-10">
         <motion.div 
           className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6"
           initial={{ opacity: 0, y: 24 }}
@@ -121,7 +154,7 @@ const Index = () => {
       </section>
 
       {/* Feature Cards */}
-      <section className="container mx-auto px-4 py-14 md:py-20">
+      <section className="container mx-auto px-4 py-14 md:py-20 relative z-10">
         <motion.div 
           className="mx-auto max-w-2xl text-center mb-10 md:mb-14"
           initial={{ opacity: 0, y: 24 }}
@@ -140,10 +173,11 @@ const Index = () => {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.45, ease: "easeOut" }}
           >
-            <div className="w-12 h-12 mb-4 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+            {/* Dark gray circular background with white icon */}
+            <div className="w-12 h-12 mb-4 rounded-full bg-secondary text-foreground flex items-center justify-center">
               <Search className="h-6 w-6" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Powerful search</h3>
+            <h3 className="text-lg font-semibold mb-2 text-foreground">Powerful search</h3>
             <p className="text-muted-foreground">Filter by category, date, and location to quickly find matches.</p>
           </motion.div>
           <motion.div 
@@ -153,10 +187,11 @@ const Index = () => {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.05 }}
           >
-            <div className="w-12 h-12 mb-4 rounded-full bg-accent/10 text-accent flex items-center justify-center">
+            {/* Dark gray circular background with white icon */}
+            <div className="w-12 h-12 mb-4 rounded-full bg-secondary text-foreground flex items-center justify-center">
               <Upload className="h-6 w-6" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Frictionless posting</h3>
+            <h3 className="text-lg font-semibold mb-2 text-foreground">Frictionless posting</h3>
             <p className="text-muted-foreground">Post a found or lost item with photos and details in minutes.</p>
           </motion.div>
           <motion.div 
@@ -166,17 +201,104 @@ const Index = () => {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.55, ease: "easeOut", delay: 0.1 }}
           >
-            <div className="w-12 h-12 mb-4 rounded-full bg-category-keys/10 text-category-keys flex items-center justify-center">
-              <Bell className="h-6 w-6" />
+            {/* Dark gray circular background with dark bell icon in dark mode */}
+            <div className="w-12 h-12 mb-4 rounded-full bg-secondary flex items-center justify-center">
+              <Bell className="h-6 w-6 text-blue-500 dark:text-gray-700" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Smart notifications</h3>
+            <h3 className="text-lg font-semibold mb-2 text-foreground">Smart notifications</h3>
             <p className="text-muted-foreground">Get updates when potential matches or replies appear.</p>
           </motion.div>
         </div>
       </section>
 
+      {/* Trusted and Loved by Users */}
+      <section className="container mx-auto px-4 py-14 md:py-20 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-center mb-12 text-foreground">
+            Trusted and loved by users
+          </h2>
+          
+          {/* Slidable Testimonials Carousel */}
+          <div className="max-w-4xl mx-auto">
+            <div className="relative overflow-hidden">
+              {/* Testimonials Container */}
+              <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentTestimonial * 100}%)` }}>
+                {testimonials.map((testimonial, index) => (
+                  <div key={index} className="min-w-full px-4">
+                    <div className="space-y-6">
+                      {/* Rating Stars - Centered */}
+                      <div className="flex items-center justify-center">
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Testimonial Quote with Navigation Buttons */}
+                      <div className="relative flex items-center gap-4">
+                        {/* Left Navigation Button */}
+                        <button 
+                          onClick={handlePrevious}
+                          className="flex-shrink-0 p-2 hover:opacity-70 transition-opacity"
+                          aria-label="Previous testimonial"
+                        >
+                          <ChevronLeft className="h-5 w-5 text-blue-500 opacity-50" />
+                        </button>
+                        
+                        {/* Testimonial Text */}
+                        <p className="text-lg md:text-xl text-foreground leading-relaxed text-center flex-1">
+                          "{testimonial.quote}"
+                        </p>
+                        
+                        {/* Right Navigation Button */}
+                        <button 
+                          onClick={handleNext}
+                          className="flex-shrink-0 p-2 hover:opacity-70 transition-opacity"
+                          aria-label="Next testimonial"
+                        >
+                          <ChevronRight className="h-5 w-5 text-blue-500 opacity-50" />
+                        </button>
+                      </div>
+                      
+                      {/* User Attribution */}
+                      <div className="space-y-1 text-center">
+                        <p className="font-semibold text-foreground">{testimonial.user}</p>
+                        <p className="text-muted-foreground">{testimonial.role}</p>
+                        <p className="text-muted-foreground">{testimonial.rating}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Indicator Dots */}
+            <div className="flex items-center justify-center gap-2 mt-8">
+              {testimonials.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentTestimonial(index)}
+                  className={`h-2 rounded-full transition-all ${
+                    index === currentTestimonial
+                      ? "w-8 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600"
+                      : "w-2 bg-gradient-to-r from-blue-400/30 via-blue-500/30 to-blue-600/30"
+                  }`}
+                  aria-label={`Go to testimonial ${index + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
       {/* CTA */}
-      <section className="py-14">
+      <section className="py-14 relative z-10">
         <div className="container mx-auto px-4">
           <motion.div 
             className="rounded-2xl border border-border bg-gradient-hero text-white p-10 md:p-12 text-center"
@@ -185,9 +307,9 @@ const Index = () => {
             viewport={{ once: true, amount: 0.4 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            <h3 className="text-3xl md:text-4xl font-bold mb-3">Ready to get started?</h3>
-            <p className="opacity-90 mb-8">Join BackTrack and help reunite items with their owners today.</p>
-            <Button size="lg" onClick={() => navigate(user ? "/post" : "/auth")} className="bg-white text-primary hover:bg-white/90">
+            <h3 className="text-3xl md:text-4xl font-bold mb-3 text-foreground">Ready to get started?</h3>
+            <p className="opacity-90 mb-8 text-foreground/80">Join BackTrack and help reunite items with their owners today.</p>
+            <Button size="lg" onClick={() => navigate(user ? "/post" : "/auth")} className="bg-white text-gray-600 hover:bg-white/90 dark:bg-white dark:text-gray-500">
               {user ? "Post an Item" : "Create an account"}
             </Button>
           </motion.div>

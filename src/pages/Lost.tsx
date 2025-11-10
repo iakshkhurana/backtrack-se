@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
 const Lost = () => {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [items, setItems] = useState<any[]>([]);
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
@@ -17,7 +17,11 @@ const Lost = () => {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
+    if (savedTheme === "light") {
+      setDarkMode(false);
+      document.documentElement.classList.remove("dark");
+    } else {
+      // Default to dark mode
       setDarkMode(true);
       document.documentElement.classList.add("dark");
     }
@@ -75,10 +79,13 @@ const Lost = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Full page gradient background */}
+      <div className="fixed inset-0 z-0 bg-purple-950/10 dark:bg-purple-950/10 bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
+      
       <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} user={user} />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 relative z-10">
         <h1 className="text-4xl font-bold mb-8">Lost Items</h1>
         
         <div className="flex flex-col md:flex-row gap-4 mb-8">
