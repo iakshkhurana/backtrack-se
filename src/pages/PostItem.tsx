@@ -170,13 +170,9 @@ const PostItem = () => {
       
       <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} user={user} />
       
-      <div className="container mx-auto px-4 py-8 max-w-2xl relative z-10">
+      <div className="container mx-auto px-4 py-8 pt-24 max-w-2xl relative z-10">
         <Card>
           <CardHeader>
-            <CardTitle className="text-3xl">Post an Item</CardTitle>
-            <CardDescription>
-              Report a lost item or list something you've found
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">

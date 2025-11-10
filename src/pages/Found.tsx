@@ -85,9 +85,7 @@ const Found = () => {
       
       <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} user={user} />
       
-      <div className="container mx-auto px-4 py-8 relative z-10">
-        <h1 className="text-4xl font-bold mb-8">Found Items</h1>
-        
+      <div className="container mx-auto px-4 py-8 pt-24 relative z-10">
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />

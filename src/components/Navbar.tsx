@@ -1,6 +1,6 @@
 import { Moon, Sun, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -9,10 +9,12 @@ interface NavbarProps {
   toggleDarkMode: () => void;
   user: any;
   position?: "fixed" | "absolute";
+  customBackgroundColor?: string;
 }
 
-export const Navbar = ({ darkMode, toggleDarkMode, user, position = "fixed" }: NavbarProps) => {
+export const Navbar = ({ darkMode, toggleDarkMode, user, position = "fixed", customBackgroundColor }: NavbarProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   /**
    * Handle navigation with smooth transition
@@ -43,8 +45,8 @@ export const Navbar = ({ darkMode, toggleDarkMode, user, position = "fixed" }: N
   return (
     <nav className={`${position} top-0 left-0 right-0 z-50 pt-4 pb-2`}>
       <div className="container mx-auto px-4">
-        {/* Navbar container - background matching page gradient */}
-        <div className="rounded-full border border-border/50 bg-purple-950/10 dark:bg-purple-950/10 bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] backdrop-blur-xl shadow-lg shadow-black/20 px-6 py-3 flex items-center justify-between max-w-7xl mx-auto">
+        {/* Navbar container - custom background colors */}
+        <div className="rounded-full border border-border/50 backdrop-blur-xl shadow-lg shadow-black/20 px-6 py-3 flex items-center justify-between max-w-7xl mx-auto" style={{ backgroundColor: customBackgroundColor || (darkMode ? '#170D26' : '#DBD1E1') }}>
           <div className="flex items-center gap-8">
             {/* Logo - white text in dark mode, blue gradient in light mode */}
             <h1 
@@ -58,21 +60,27 @@ export const Navbar = ({ darkMode, toggleDarkMode, user, position = "fixed" }: N
               <Button 
                 variant="ghost" 
                 onClick={() => handleNavigate("/")}
-                className="rounded-full hover:bg-muted hover:text-foreground transition-all duration-200"
+                className={`rounded-full hover:bg-muted hover:text-foreground transition-all duration-200 ${
+                  location.pathname === "/" ? "bg-primary/20 text-primary font-semibold" : ""
+                }`}
               >
                 Home
               </Button>
               <Button 
                 variant="ghost" 
                 onClick={() => handleNavigate("/lost")}
-                className="rounded-full hover:bg-muted hover:text-foreground transition-all duration-200"
+                className={`rounded-full hover:bg-muted hover:text-foreground transition-all duration-200 ${
+                  location.pathname === "/lost" ? "bg-primary/20 text-primary font-semibold" : ""
+                }`}
               >
                 Lost Items
               </Button>
               <Button 
                 variant="ghost" 
                 onClick={() => handleNavigate("/found")}
-                className="rounded-full hover:bg-muted hover:text-foreground transition-all duration-200"
+                className={`rounded-full hover:bg-muted hover:text-foreground transition-all duration-200 ${
+                  location.pathname === "/found" ? "bg-primary/20 text-primary font-semibold" : ""
+                }`}
               >
                 Found Items
               </Button>
@@ -80,7 +88,9 @@ export const Navbar = ({ darkMode, toggleDarkMode, user, position = "fixed" }: N
                 <Button 
                   variant="ghost" 
                   onClick={() => handleNavigate("/post")}
-                  className="rounded-full hover:bg-muted hover:text-foreground transition-all duration-200"
+                  className={`rounded-full hover:bg-muted hover:text-foreground transition-all duration-200 ${
+                    location.pathname === "/post" ? "bg-primary/20 text-primary font-semibold" : ""
+                  }`}
                 >
                   Post Item
                 </Button>
