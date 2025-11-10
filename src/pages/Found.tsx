@@ -94,11 +94,11 @@ const Found = () => {
               placeholder="Search items..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 h-9 text-sm"
             />
           </div>
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-full md:w-[200px]">
+            <SelectTrigger className="w-full md:w-[200px] h-9 text-sm">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>

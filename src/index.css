@@ -18,8 +18,8 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 230 25% 15%;
 
-    /* Primary: Vibrant blue (#007BFF) for solid buttons (like "Get Started") */
-    --primary: 217 100% 50%;
+    /* Primary: Pinkish-blue (periwinkle/lavender-blue) for solid buttons (like "Get Started") */
+    --primary: 260 70% 60%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
@@ -29,7 +29,7 @@ All colors MUST be HSL.
     --muted: 210 40% 96.1%;
     --muted-foreground: 215 16% 47%;
 
-    --accent: 217 100% 45%;
+    --accent: 260 65% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -37,7 +37,7 @@ All colors MUST be HSL.
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 217 100% 50%;
+    --ring: 260 70% 60%;
 
     --radius: 0.75rem;
 
@@ -50,9 +50,9 @@ All colors MUST be HSL.
     --category-clothing: 340 75% 55%;
     --category-other: 200 18% 46%;
 
-    /* Gradient tokens - blue gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(217 100% 50%) 0%, hsl(217 100% 40%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(217 100% 98%) 100%);
+    /* Gradient tokens - pinkish-blue gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(260 70% 60%) 0%, hsl(260 70% 50%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(260 70% 98%) 100%);
   }
 
   .dark {
@@ -66,9 +66,9 @@ All colors MUST be HSL.
     --popover: 240 20% 8%;
     --popover-foreground: 0 0% 100%;
 
-    /* Primary: White for solid buttons (like "Get Started") with dark text */
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 20%;
+    /* Primary: Pinkish-blue (periwinkle/lavender-blue) for solid buttons (like "Get Started") */
+    --primary: 260 70% 65%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 240 20% 12%;
     --secondary-foreground: 0 0% 100%;
@@ -77,7 +77,7 @@ All colors MUST be HSL.
     --muted: 240 20% 10%;
     --muted-foreground: 0 0% 80%;
 
-    --accent: 240 20% 15%;
+    --accent: 260 65% 60%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;

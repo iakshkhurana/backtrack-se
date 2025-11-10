@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import heroImage from "@/assets/hero-bg.jpg";
-import { Search, Upload, Bell, Shield, Users, Clock, ChevronLeft, ChevronRight, Star, AlertCircle, Heart } from "lucide-react";
+import img2 from "@/assets/img-2.png";
+import { Search, Upload, Bell, Shield, Users, Clock, ChevronLeft, ChevronRight, Star, AlertCircle, Heart, Sparkles, Zap, Car, IndianRupee, MapPin, Venus } from "lucide-react";
 import { motion } from "framer-motion";
 import { HeroSection } from "@/components/hero-section-dark";
 import {
@@ -177,61 +178,211 @@ const Index = () => {
         </motion.div>
       </section>
 
-      {/* Feature Cards */}
-      <section className="container mx-auto px-4 py-14 md:py-20 relative z-10">
-        <motion.div 
-          className="mx-auto max-w-2xl text-center mb-10 md:mb-14"
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        >
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Everything you need to get items back</h2>
-          <p className="text-muted-foreground mt-3">Clear workflows, helpful automations, and privacy-first communication.</p>
-        </motion.div>
-        <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+      {/* Why Choose BackTrack Section */}
+      <section className="py-14 md:py-20 relative z-10 bg-background">
+        <div className="container mx-auto px-4">
           <motion.div 
-            className="p-6 rounded-2xl border border-border bg-card hover:shadow-sm transition-shadow"
+            className="mx-auto max-w-4xl text-center mb-10 md:mb-14"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.45, ease: "easeOut" }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            {/* Dark gray circular background with white icon */}
-            <div className="w-12 h-12 mb-4 rounded-full bg-secondary text-foreground flex items-center justify-center">
-              <Search className="h-6 w-6" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2 text-foreground">Powerful search</h3>
-            <p className="text-muted-foreground">Filter by category, date, and location to quickly find matches.</p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
+              <span className="text-foreground">Why Choose </span>
+              <span className="text-primary">BackTrack?</span>
+            </h2>
+            <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
+              Our platform makes it easy for campus students to report lost items, find belongings, and reunite with their possessions quickly and securely.
+            </p>
           </motion.div>
-          <motion.div 
-            className="p-6 rounded-2xl border border-border bg-card hover:shadow-sm transition-shadow"
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
+            {/* Smart Search Card */}
+            <motion.div 
+              className="p-6 rounded-2xl border border-border bg-card hover:shadow-lg transition-all select-none"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+            >
+              <div className="w-14 h-14 mb-4 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+                <Search className="h-7 w-7 text-primary" strokeWidth={2} />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-foreground">Smart Search</h3>
+              <p className="text-muted-foreground">
+                Find items quickly with AI-powered search and advanced filtering by category, location, and date.
+              </p>
+            </motion.div>
+
+            {/* Quick Posting Card */}
+            <motion.div 
+              className="p-6 rounded-2xl border border-border bg-card hover:shadow-lg transition-all select-none"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.05 }}
+            >
+              <div className="w-14 h-14 mb-4 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+                <Upload className="h-7 w-7 text-primary" strokeWidth={2} />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-foreground">Quick Posting</h3>
+              <p className="text-muted-foreground">
+                Post lost or found items effortlessly with voice commands, image analysis, and automated form filling.
+              </p>
+            </motion.div>
+
+            {/* AI Matching Card */}
+            <motion.div 
+              className="p-6 rounded-2xl border border-border bg-card hover:shadow-lg transition-all select-none"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.55, ease: "easeOut", delay: 0.1 }}
+            >
+              <div className="w-14 h-14 mb-4 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+                <Sparkles className="h-7 w-7 text-primary" strokeWidth={2} />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-foreground">AI Matching</h3>
+              <p className="text-muted-foreground">
+                Intelligent matching system connects lost items with their owners using advanced AI algorithms.
+              </p>
+            </motion.div>
+
+            {/* Secure & Safe Card */}
+            <motion.div 
+              className="p-6 rounded-2xl border border-border bg-card hover:shadow-lg transition-all select-none"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
+            >
+              <div className="w-14 h-14 mb-4 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+                <Shield className="h-7 w-7 text-primary" strokeWidth={2} />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-foreground">Secure & Safe</h3>
+              <p className="text-muted-foreground">
+                Your data is protected with secure authentication, privacy-first design, and verified user profiles.
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-14 md:py-20 relative z-10 bg-background">
+        <div className="container mx-auto px-4">
+          <motion.div
+            className="mx-auto max-w-4xl text-center mb-10 md:mb-14"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.05 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            {/* Dark gray circular background with white icon */}
-            <div className="w-12 h-12 mb-4 rounded-full bg-secondary text-foreground flex items-center justify-center">
-              <Upload className="h-6 w-6" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2 text-foreground">Frictionless posting</h3>
-            <p className="text-muted-foreground">Post a found or lost item with photos and details in minutes.</p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
+              <span className="text-foreground">Key </span>
+              <span className="text-primary">Features</span>
+            </h2>
+            <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
+              Make campus lost-and-found effortless with fast search, quick posting, and secure interactions.
+            </p>
           </motion.div>
-          <motion.div 
-            className="p-6 rounded-2xl border border-border bg-card hover:shadow-sm transition-shadow"
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.55, ease: "easeOut", delay: 0.1 }}
-          >
-            {/* Dark gray circular background with dark bell icon in dark mode */}
-            <div className="w-12 h-12 mb-4 rounded-full bg-secondary flex items-center justify-center">
-              <Bell className="h-6 w-6 text-blue-500 dark:text-gray-700" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2 text-foreground">Smart notifications</h3>
-            <p className="text-muted-foreground">Get updates when potential matches or replies appear.</p>
-          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 max-w-6xl mx-auto">
+            {/* Create Pools / Quick Posting */}
+            <motion.div
+              className="p-6 rounded-2xl border border-border bg-card hover:shadow-lg transition-all select-none"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+              <div className="w-14 h-14 mb-4 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+                <Car className="h-7 w-7 text-primary" strokeWidth={2} />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-foreground">Create Posts</h3>
+              <p className="text-muted-foreground">Easily create lost/found posts with images and details.</p>
+            </motion.div>
+
+            {/* Find Companions / Community */}
+            <motion.div
+              className="p-6 rounded-2xl border border-border bg-card hover:shadow-lg transition-all select-none"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+            >
+              <div className="w-14 h-14 mb-4 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+                <Users className="h-7 w-7 text-primary" strokeWidth={2} />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-foreground">Find Matches</h3>
+              <p className="text-muted-foreground">Connect with students who reported similar items.</p>
+            </motion.div>
+
+            {/* Save Money / Time saved */}
+            <motion.div
+              className="p-6 rounded-2xl border border-border bg-card hover:shadow-lg transition-all select-none"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              <div className="w-14 h-14 mb-4 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+                <Clock className="h-7 w-7 text-primary" strokeWidth={2} />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-foreground">Save Time</h3>
+              <p className="text-muted-foreground">AI-powered search reduces time to find what you need.</p>
+            </motion.div>
+
+            {/* Female-only / Safety */}
+            <motion.div
+              className="p-6 rounded-2xl border border-border bg-card hover:shadow-lg transition-all select-none"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.55, ease: "easeOut" }}
+            >
+              <div className="w-14 h-14 mb-4 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+                <Venus className="h-7 w-7 text-primary" strokeWidth={2} />
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-foreground">Safe by Design</h3>
+              <p className="text-muted-foreground">Privacy-first communication and report verification.</p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* About */}
+      <section className="py-14 md:py-20 relative z-10 bg-background">
+        <div className="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+          <div className="space-y-6 select-none">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+              <span className="text-foreground">About </span>
+              <span className="text-primary">BackTrack</span>
+            </h2>
+            <p className="text-muted-foreground text-base md:text-lg">
+              BackTrack is a student-led initiative to solve campus lost-and-found. We connect
+              people who are searching with people who have found items, helping everyone reunite
+              with their belongings quickly.
+            </p>
+            <ul className="space-y-4 text-muted-foreground">
+              <li className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                <span>Locate items faster with category, date and location filters.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Users className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                <span>Community-first approach with simple, privacy-safe messaging.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <IndianRupee className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                <span>Transparent process with zero platform fees.</span>
+              </li>
+            </ul>
+          </div>
+          <div className="rounded-2xl overflow-hidden border border-border bg-card">
+            <img src={img2} alt="BackTrack students" className="w-full h-full object-cover" draggable={false} />
+          </div>
         </div>
       </section>
 
@@ -272,7 +423,7 @@ const Index = () => {
                           className="flex-shrink-0 p-2 hover:opacity-70 transition-opacity"
                           aria-label="Previous testimonial"
                         >
-                          <ChevronLeft className="h-5 w-5 text-blue-500 opacity-50" />
+                          <ChevronLeft className="h-5 w-5 text-primary opacity-50" />
                         </button>
                         
                         {/* Testimonial Text */}
@@ -286,7 +437,7 @@ const Index = () => {
                           className="flex-shrink-0 p-2 hover:opacity-70 transition-opacity"
                           aria-label="Next testimonial"
                         >
-                          <ChevronRight className="h-5 w-5 text-blue-500 opacity-50" />
+                          <ChevronRight className="h-5 w-5 text-primary opacity-50" />
                         </button>
                       </div>
                       
@@ -310,8 +461,8 @@ const Index = () => {
                   onClick={() => setCurrentTestimonial(index)}
                   className={`h-2 rounded-full transition-all ${
                     index === currentTestimonial
-                      ? "w-8 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600"
-                      : "w-2 bg-gradient-to-r from-blue-400/30 via-blue-500/30 to-blue-600/30"
+                      ? "w-8 bg-primary"
+                      : "w-2 bg-primary/30"
                   }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
@@ -319,6 +470,51 @@ const Index = () => {
             </div>
           </div>
         </motion.div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-14 md:py-20 relative z-10 bg-background">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-center mb-4">
+              <span className="text-foreground">Frequently Asked </span>
+              <span className="text-primary">Questions</span>
+            </h2>
+            <p className="text-muted-foreground text-center mb-8">
+              Get answers to common questions about using the BackTrack platform.
+            </p>
+            <div className="space-y-4">
+              <details className="group rounded-xl border border-border bg-card px-5 py-4 open:bg-card/80 hover:shadow-md transition-all select-none">
+                <summary className="cursor-pointer list-none text-foreground font-medium flex items-center justify-between">
+                  How do I post a lost or found item?
+                  <span className="ml-2 text-muted-foreground group-open:rotate-180 transition-transform">⌄</span>
+                </summary>
+                <p className="mt-3 text-muted-foreground">Go to Post Item, add the details and image. You can also use voice or image analysis to auto-fill fields.</p>
+              </details>
+
+              <details className="group rounded-xl border border-border bg-card px-5 py-4 open:bg-card/80 hover:shadow-md transition-all select-none">
+                <summary className="cursor-pointer list-none text-foreground font-medium flex items-center justify-between">
+                  Is BackTrack free to use?
+                  <span className="ml-2 text-muted-foreground group-open:rotate-180 transition-transform">⌄</span>
+                </summary>
+                <p className="mt-3 text-muted-foreground">Yes. BackTrack is free for students. There are no platform fees.</p>
+              </details>
+
+              <details className="group rounded-xl border border-border bg-card px-5 py-4 open:bg-card/80 hover:shadow-md transition-all select-none">
+                <summary className="cursor-pointer list-none text-foreground font-medium flex items-center justify-between">
+                  How does verification work?
+                  <span className="ml-2 text-muted-foreground group-open:rotate-180 transition-transform">⌄</span>
+                </summary>
+                <p className="mt-3 text-muted-foreground">Claimants provide verification details. Owners review and approve. Admin tools help in case of disputes.</p>
+              </details>
+            </div>
+          </motion.div>
+        </div>
       </section>
 
       {/* CTA */}
@@ -393,8 +589,8 @@ const Index = () => {
               className="h-auto p-6 flex flex-col items-start gap-2 hover:bg-primary/5 hover:border-primary/50 transition-all"
             >
               <div className="flex items-center gap-3 w-full">
-                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/20">
-                  <Heart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
+                  <Heart className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1 text-left">
                   <div className="font-semibold text-lg">Want to help by posting?</div>

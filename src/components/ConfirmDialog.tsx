@@ -60,9 +60,9 @@ export const ConfirmDialog = ({
     },
     info: {
       icon: Info,
-      iconColor: "text-blue-600 dark:text-blue-400",
-      iconBg: "bg-blue-500/10",
-      button: "bg-blue-500 hover:bg-blue-600 text-white",
+      iconColor: "text-primary",
+      iconBg: "bg-primary/10",
+      button: "bg-primary hover:bg-primary/90 text-white",
     },
     success: {
       icon: CheckCircle2,

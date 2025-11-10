@@ -268,7 +268,7 @@ const PostItem = () => {
                   onValueChange={(value) => setFormData({ ...formData, status: value })}
                   required
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9 text-sm">
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -285,6 +285,7 @@ const PostItem = () => {
                   placeholder="e.g., Blue iPhone 13"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="h-9 text-sm"
                   required
                 />
               </div>
@@ -296,7 +297,7 @@ const PostItem = () => {
                   onValueChange={(value) => setFormData({ ...formData, category: value })}
                   required
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9 text-sm">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -329,6 +330,7 @@ const PostItem = () => {
                   placeholder="Where was it lost/found?"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  className="h-9 text-sm"
                 />
               </div>
 
@@ -336,13 +338,14 @@ const PostItem = () => {
                 <Label htmlFor="contact_info">Contact Information *</Label>
                 <Input
                   id="contact_info"
-                  placeholder="Name-PhoneNumber (e.g., AKSH KHURANA-8058501004) or Email/Phone"
+                  placeholder="Name-PhoneNumber or Email/Phone"
                   value={formData.contact_info}
                   onChange={(e) => setFormData({ ...formData, contact_info: e.target.value })}
+                  className="h-9 text-sm"
                   required
                 />
                 <p className="text-xs text-muted-foreground">
-                  Format: Name-PhoneNumber (e.g., AKSH KHURANA-8058501004) or just email/phone
+                  Format: Name-PhoneNumber or just email/phone
                 </p>
               </div>
 
