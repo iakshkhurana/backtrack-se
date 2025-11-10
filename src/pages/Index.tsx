@@ -107,8 +107,8 @@ const Index = () => {
       />
       <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} user={user} position="fixed" />
 
-      {/* Hero Section - Full Page */}
-      <div className="pt-20">
+      {/* Hero Section - Full Page - Starts from top */}
+      <div className="pt-0">
         <HeroSection
         title="Campus Lost & Found"
         subtitle={{
@@ -122,6 +122,7 @@ const Index = () => {
           light: heroImage,
           dark: heroImage
         }}
+        className="pt-32"
       />
       </div>
 
@@ -301,14 +302,17 @@ const Index = () => {
       <section className="py-14 relative z-10">
         <div className="container mx-auto px-4">
           <motion.div 
-            className="rounded-2xl border border-border bg-gradient-hero text-white p-10 md:p-12 text-center"
+            className="rounded-2xl border border-border p-10 md:p-12 text-center"
+            style={{
+              background: 'linear-gradient(to right, #0892d0 0%, #4b0082 100%)'
+            }}
             initial={{ opacity: 0, scale: 0.98 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, amount: 0.4 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            <h3 className="text-3xl md:text-4xl font-bold mb-3 text-foreground">Ready to get started?</h3>
-            <p className="opacity-90 mb-8 text-foreground/80">Join BackTrack and help reunite items with their owners today.</p>
+            <h3 className="text-3xl md:text-4xl font-bold mb-3 text-white">Ready to get started?</h3>
+            <p className="opacity-90 mb-8 text-white/90">Join BackTrack and help reunite items with their owners today.</p>
             <Button size="lg" onClick={() => navigate(user ? "/post" : "/auth")} className="bg-white text-gray-600 hover:bg-white/90 dark:bg-white dark:text-gray-500">
               {user ? "Post an Item" : "Create an account"}
             </Button>
