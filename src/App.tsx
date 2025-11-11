@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -15,6 +15,7 @@ import VerifyTables from "./pages/VerifyTables";
 import NotFound from "./pages/NotFound";
 import { motion, AnimatePresence } from "framer-motion";
 import { AIChat } from "@/components/AIChat";
+import { supabase } from "@/integrations/supabase/client";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +85,52 @@ const AnimatedRoutes = () => {
   );
 };
 
+/**
+ * OAuth Callback Handler Component
+ * Handles OAuth redirects by processing the hash fragment from the URL
+ * This component should be rendered inside BrowserRouter to access navigation
+ */
+const OAuthCallbackHandler = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    /**
+     * Handle OAuth callback
+     * When Supabase redirects back from OAuth provider, the access token is in the hash fragment
+     * We need to process this to complete the authentication
+     */
+    const handleOAuthCallback = async () => {
+      // Check if there's a hash fragment with OAuth tokens
+      const hashParams = window.location.hash;
+      
+      if (hashParams && hashParams.includes('access_token')) {
+        try {
+          // Get the session from the hash fragment
+          // Supabase automatically processes the hash fragment when we call getSession()
+          const { data: { session }, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error("Error processing OAuth callback:", error);
+            return;
+          }
+
+          if (session) {
+            // OAuth login successful, clear the hash and redirect to home
+            window.history.replaceState(null, '', window.location.pathname);
+            navigate("/");
+          }
+        } catch (error) {
+          console.error("Error handling OAuth callback:", error);
+        }
+      }
+    };
+
+    handleOAuthCallback();
+  }, [navigate]);
+
+  return null; // This component doesn't render anything
+};
+
 const App = () => {
   // State to track if preloader should be shown (only on initial load)
   const [showPreloader, setShowPreloader] = useState(false);
@@ -118,6 +165,8 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          {/* OAuth Callback Handler - processes OAuth redirects */}
+          <OAuthCallbackHandler />
           {/* AnimatedRoutes handles smooth page transitions */}
           <AnimatedRoutes />
           {/* AI Chat - available on all pages */}
