@@ -10,6 +10,7 @@ import Lost from "./pages/Lost";
 import Found from "./pages/Found";
 import PostItem from "./pages/PostItem";
 import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
 import VerifyTables from "./pages/VerifyTables";
 import NotFound from "./pages/NotFound";
 import { motion, AnimatePresence } from "framer-motion";
@@ -73,6 +74,7 @@ const AnimatedRoutes = () => {
           <Route path="/found" element={<Found />} />
           <Route path="/post" element={<PostItem />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/verify-tables" element={<VerifyTables />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

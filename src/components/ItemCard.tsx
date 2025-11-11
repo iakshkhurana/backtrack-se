@@ -63,6 +63,11 @@ export const ItemCard = ({ item, currentUserId, onDelete }: ItemCardProps) => {
     }
   };
 
+  /**
+   * Handle claim submission
+   * Creates a claim record in the claims table with verification details
+   * Also updates the item's claim_status to 'pending' if not already set
+   */
   const handleClaim = async () => {
     if (!currentUserId) {
       toast.error("Please sign in to claim items");
@@ -76,22 +81,67 @@ export const ItemCard = ({ item, currentUserId, onDelete }: ItemCardProps) => {
 
     setClaiming(true);
     try {
-      const { error } = await supabase
+      // Check if claim already exists
+      const { data: existingClaim } = await supabase
+        .from("claims")
+        .select("id, status")
+        .eq("item_id", item.id)
+        .eq("claimant_id", currentUserId)
+        .single();
+
+      if (existingClaim) {
+        toast.error("You have already submitted a claim for this item");
+        setShowClaimDialog(false);
+        setVerificationDetails("");
+        setClaiming(false);
+        return;
+      }
+
+      // Insert new claim
+      const { data: claimData, error: claimError } = await supabase
         .from("claims")
         .insert({
           item_id: item.id,
           claimant_id: currentUserId,
-          verification_details: verificationDetails,
+          verification_details: verificationDetails.trim(),
           status: "pending",
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (claimError) {
+        console.error("Claim error:", claimError);
+        // Check for specific error types
+        if (claimError.code === "23505") {
+          toast.error("You have already submitted a claim for this item");
+        } else if (claimError.code === "42501") {
+          toast.error("Permission denied. Please check your account permissions.");
+        } else {
+          toast.error(claimError.message || "Error submitting claim. Please try again.");
+        }
+        return;
+      }
+
+      // Update item claim_status to 'pending' if it's currently 'open'
+      if (claimData) {
+        const { error: updateError } = await supabase
+          .from("items")
+          .update({ claim_status: "pending" })
+          .eq("id", item.id)
+          .eq("claim_status", "open"); // Only update if currently 'open'
+
+        if (updateError) {
+          console.warn("Could not update item claim_status:", updateError);
+          // Don't fail the claim if this update fails
+        }
+      }
 
       toast.success("Claim request submitted successfully!");
       setShowClaimDialog(false);
       setVerificationDetails("");
     } catch (error: any) {
-      toast.error(error.message || "Error submitting claim");
+      console.error("Unexpected error in handleClaim:", error);
+      toast.error(error.message || "Error submitting claim. Please try again.");
     } finally {
       setClaiming(false);
     }

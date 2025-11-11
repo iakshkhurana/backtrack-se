@@ -320,6 +320,24 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create triggers for updated_at
+-- Add trigger for items table if it exists and doesn't have one
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'items') THEN
+    -- Drop trigger if exists to avoid conflicts
+    DROP TRIGGER IF EXISTS set_updated_at_items ON public.items;
+    -- Create trigger for items updated_at
+    CREATE TRIGGER set_updated_at_items
+      BEFORE UPDATE ON public.items
+      FOR EACH ROW
+      EXECUTE FUNCTION public.handle_updated_at();
+  END IF;
+END $$;
+
+-- Drop triggers if they exist to avoid conflicts
+DROP TRIGGER IF EXISTS set_updated_at_profiles ON public.profiles;
+DROP TRIGGER IF EXISTS set_updated_at_claims ON public.claims;
+
 CREATE TRIGGER set_updated_at_profiles
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW
@@ -346,6 +364,9 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger for updating conversation last_message_at
+-- Drop trigger if it exists to avoid conflicts
+DROP TRIGGER IF EXISTS update_conversation_last_message_trigger ON public.messages;
+
 CREATE TRIGGER update_conversation_last_message_trigger
   AFTER INSERT ON public.messages
   FOR EACH ROW
@@ -378,6 +399,9 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger for updating item claim_status
+-- Drop trigger if it exists to avoid conflicts
+DROP TRIGGER IF EXISTS update_item_claim_status_trigger ON public.claims;
+
 CREATE TRIGGER update_item_claim_status_trigger
   AFTER UPDATE OF status ON public.claims
   FOR EACH ROW
@@ -402,6 +426,9 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Create trigger for auto-creating profile
+-- Drop trigger if it exists to avoid conflicts
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
@@ -411,13 +438,76 @@ CREATE TRIGGER on_auth_user_created
 -- STEP 14: Row Level Security (RLS) Policies
 -- ============================================
 
--- Enable RLS on all tables
+-- Enable RLS on all tables (including items if not already enabled)
+DO $$ 
+BEGIN
+  -- Enable RLS on items table if it exists and RLS is not already enabled
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'items') THEN
+    ALTER TABLE public.items ENABLE ROW LEVEL SECURITY;
+  END IF;
+END $$;
+
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.claims ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.matches ENABLE ROW LEVEL SECURITY;
+
+-- ============================================
+-- ITEMS POLICIES (if items table exists)
+-- ============================================
+
+-- Drop existing policies if they exist (to avoid conflicts)
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'items') THEN
+    -- Drop existing policies if any
+    DROP POLICY IF EXISTS "Items are viewable by everyone" ON public.items;
+    DROP POLICY IF EXISTS "Users can insert own items" ON public.items;
+    DROP POLICY IF EXISTS "Users can update own items" ON public.items;
+    DROP POLICY IF EXISTS "Users can delete own items" ON public.items;
+    DROP POLICY IF EXISTS "Admins can manage all items" ON public.items;
+    
+    -- Anyone can view items
+    CREATE POLICY "Items are viewable by everyone"
+      ON public.items FOR SELECT
+      USING (true);
+
+    -- Authenticated users can insert items
+    CREATE POLICY "Users can insert own items"
+      ON public.items FOR INSERT
+      WITH CHECK (auth.uid() = user_id);
+
+    -- Users can update their own items
+    CREATE POLICY "Users can update own items"
+      ON public.items FOR UPDATE
+      USING (auth.uid() = user_id);
+
+    -- Users can delete their own items
+    CREATE POLICY "Users can delete own items"
+      ON public.items FOR DELETE
+      USING (auth.uid() = user_id);
+
+    -- Admins and moderators can manage all items (SELECT, INSERT, UPDATE, DELETE)
+    CREATE POLICY "Admins can manage all items"
+      ON public.items FOR ALL
+      USING (
+        EXISTS (
+          SELECT 1 FROM public.profiles 
+          WHERE id = auth.uid() 
+          AND role IN ('admin', 'moderator')
+        )
+      )
+      WITH CHECK (
+        EXISTS (
+          SELECT 1 FROM public.profiles 
+          WHERE id = auth.uid() 
+          AND role IN ('admin', 'moderator')
+        )
+      );
+  END IF;
+END $$;
 
 -- ============================================
 -- PROFILES POLICIES
@@ -438,11 +528,36 @@ CREATE POLICY "Users can insert own profile"
   ON public.profiles FOR INSERT
   WITH CHECK (auth.uid() = id);
 
+-- Note: "Profiles are viewable by everyone" policy already allows admins to view all profiles
+-- This policy is redundant but kept for clarity
+
+-- Admins can update any profile (for role management)
+CREATE POLICY "Admins can update any profile"
+  ON public.profiles FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE id = auth.uid() 
+      AND role = 'admin'
+    )
+  );
+
+-- Admins can delete any profile
+CREATE POLICY "Admins can delete any profile"
+  ON public.profiles FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE id = auth.uid() 
+      AND role = 'admin'
+    )
+  );
+
 -- ============================================
 -- CLAIMS POLICIES
 -- ============================================
 
--- Anyone can view claims
+-- Anyone can view claims (including admins)
 CREATE POLICY "Claims are viewable by everyone"
   ON public.claims FOR SELECT
   USING (true);
@@ -453,17 +568,34 @@ CREATE POLICY "Users can create claims"
   WITH CHECK (auth.uid() = claimant_id);
 
 -- Users can update their own claims or item owners can update claims on their items
+-- Admins and moderators can update any claim
 CREATE POLICY "Users can update own claims or item owners can update claims on their items"
   ON public.claims FOR UPDATE
   USING (
     auth.uid() = claimant_id OR
-    auth.uid() IN (SELECT user_id FROM public.items WHERE id = item_id)
+    auth.uid() IN (SELECT user_id FROM public.items WHERE id = item_id) OR
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE id = auth.uid() 
+      AND role IN ('admin', 'moderator')
+    )
   );
 
 -- Users can delete their own claims
 CREATE POLICY "Users can delete own claims"
   ON public.claims FOR DELETE
   USING (auth.uid() = claimant_id);
+
+-- Admins and moderators can delete any claim
+CREATE POLICY "Admins can delete any claim"
+  ON public.claims FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE id = auth.uid() 
+      AND role IN ('admin', 'moderator')
+    )
+  );
 
 -- ============================================
 -- CONVERSATIONS POLICIES
@@ -491,6 +623,28 @@ CREATE POLICY "Users can update own conversations"
   USING (
     auth.uid() = participant1_id OR
     auth.uid() = participant2_id
+  );
+
+-- Admins and moderators can view all conversations
+CREATE POLICY "Admins can view all conversations"
+  ON public.conversations FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE id = auth.uid() 
+      AND role IN ('admin', 'moderator')
+    )
+  );
+
+-- Admins and moderators can delete any conversation
+CREATE POLICY "Admins can delete any conversation"
+  ON public.conversations FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE id = auth.uid() 
+      AND role IN ('admin', 'moderator')
+    )
   );
 
 -- ============================================
@@ -525,6 +679,28 @@ CREATE POLICY "Users can update own received messages"
   ON public.messages FOR UPDATE
   USING (auth.uid() = receiver_id);
 
+-- Admins and moderators can view all messages
+CREATE POLICY "Admins can view all messages"
+  ON public.messages FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE id = auth.uid() 
+      AND role IN ('admin', 'moderator')
+    )
+  );
+
+-- Admins and moderators can delete any message
+CREATE POLICY "Admins can delete any message"
+  ON public.messages FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE id = auth.uid() 
+      AND role IN ('admin', 'moderator')
+    )
+  );
+
 -- ============================================
 -- NOTIFICATIONS POLICIES
 -- ============================================
@@ -551,11 +727,33 @@ CREATE POLICY "Users can delete own notifications"
   ON public.notifications FOR DELETE
   USING (auth.uid() = user_id);
 
+-- Admins and moderators can view all notifications
+CREATE POLICY "Admins can view all notifications"
+  ON public.notifications FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE id = auth.uid() 
+      AND role IN ('admin', 'moderator')
+    )
+  );
+
+-- Admins and moderators can delete any notification
+CREATE POLICY "Admins can delete any notification"
+  ON public.notifications FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE id = auth.uid() 
+      AND role IN ('admin', 'moderator')
+    )
+  );
+
 -- ============================================
 -- MATCHES POLICIES
 -- ============================================
 
--- Anyone can view matches
+-- Anyone can view matches (including admins)
 CREATE POLICY "Matches are viewable by everyone"
   ON public.matches FOR SELECT
   USING (true);
@@ -572,6 +770,17 @@ CREATE POLICY "Users can update matches for own items"
   USING (
     auth.uid() IN (
       SELECT user_id FROM public.items WHERE id = lost_item_id OR id = found_item_id
+    )
+  );
+
+-- Admins and moderators can delete any match
+CREATE POLICY "Admins can delete any match"
+  ON public.matches FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE id = auth.uid() 
+      AND role IN ('admin', 'moderator')
     )
   );
 
@@ -685,6 +894,56 @@ GRANT EXECUTE ON FUNCTION public.get_or_create_conversation(UUID, UUID, UUID) TO
 GRANT EXECUTE ON FUNCTION public.get_unread_notification_count(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_unread_message_count(UUID) TO authenticated;
 
+-- Grant permissions on items table if it exists
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'items') THEN
+    GRANT ALL ON public.items TO authenticated;
+  END IF;
+END $$;
+
+-- ============================================
+-- STEP 18: Admin Helper Functions (NEW)
+-- ============================================
+
+-- Function to check if user is admin or moderator
+CREATE OR REPLACE FUNCTION public.is_admin_or_moderator(p_user_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = p_user_id
+    AND role IN ('admin', 'moderator')
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to get admin dashboard statistics
+CREATE OR REPLACE FUNCTION public.get_admin_stats()
+RETURNS TABLE (
+  total_items BIGINT,
+  total_users BIGINT,
+  pending_claims BIGINT,
+  approved_claims BIGINT,
+  rejected_claims BIGINT,
+  total_claims BIGINT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    (SELECT COUNT(*) FROM public.items)::BIGINT AS total_items,
+    (SELECT COUNT(*) FROM public.profiles)::BIGINT AS total_users,
+    (SELECT COUNT(*) FROM public.claims WHERE status = 'pending')::BIGINT AS pending_claims,
+    (SELECT COUNT(*) FROM public.claims WHERE status = 'approved')::BIGINT AS approved_claims,
+    (SELECT COUNT(*) FROM public.claims WHERE status = 'rejected')::BIGINT AS rejected_claims,
+    (SELECT COUNT(*) FROM public.claims)::BIGINT AS total_claims;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permissions on admin functions
+GRANT EXECUTE ON FUNCTION public.is_admin_or_moderator(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_admin_stats() TO authenticated;
+
 -- ============================================
 -- COMPLETION MESSAGE
 -- ============================================
@@ -692,25 +951,32 @@ GRANT EXECUTE ON FUNCTION public.get_unread_message_count(UUID) TO authenticated
 DO $$
 BEGIN
   RAISE NOTICE '============================================';
-  RAISE NOTICE 'High Priority Features Schema Created!';
+  RAISE NOTICE 'High Priority Features Schema Updated!';
   RAISE NOTICE '============================================';
-  RAISE NOTICE 'Tables created:';
+  RAISE NOTICE 'Tables created/updated:';
   RAISE NOTICE '  - profiles';
   RAISE NOTICE '  - claims';
   RAISE NOTICE '  - conversations';
   RAISE NOTICE '  - messages';
   RAISE NOTICE '  - notifications';
   RAISE NOTICE '  - matches';
+  RAISE NOTICE '  - items (RLS policies added)';
+  RAISE NOTICE '';
+  RAISE NOTICE 'New Features Added:';
+  RAISE NOTICE '  - Items table RLS policies';
+  RAISE NOTICE '  - Admin/moderator policies for all tables';
+  RAISE NOTICE '  - Admin helper functions';
+  RAISE NOTICE '  - Items updated_at trigger';
   RAISE NOTICE '';
   RAISE NOTICE 'All RLS policies have been enabled.';
   RAISE NOTICE 'Triggers and functions have been created.';
   RAISE NOTICE '';
   RAISE NOTICE 'Next steps:';
-  RAISE NOTICE '1. Test the schema by creating a profile';
-  RAISE NOTICE '2. Create a claim on an item';
-  RAISE NOTICE '3. Start a conversation';
-  RAISE NOTICE '4. Create a notification';
-  RAISE NOTICE '5. Create a match';
+  RAISE NOTICE '1. Set up admin user:';
+  RAISE NOTICE '   UPDATE public.profiles SET role = ''admin'' WHERE id = ''<user-id>'';';
+  RAISE NOTICE '2. Test the claim functionality';
+  RAISE NOTICE '3. Access admin panel at /admin';
+  RAISE NOTICE '4. Test admin features (approve/reject claims, manage items, etc.)';
   RAISE NOTICE '============================================';
 END $$;
 

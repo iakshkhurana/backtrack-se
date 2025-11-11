@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Navbar } from "@/components/Navbar";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { User as UserIcon, Mail, Calendar, Package, MessageSquare, Bell } from "lucide-react";
+import { User as UserIcon, Mail, Calendar, Package, MessageSquare, Bell, Camera, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { LoaderOne } from "@/components/ui/loader";
 
@@ -26,6 +26,9 @@ const Profile = () => {
     full_name: "",
     bio: "",
   });
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -101,6 +104,15 @@ const Profile = () => {
           full_name: data.full_name || "",
           bio: data.bio || "",
         });
+        
+        // Set profile photo: priority: avatar_url > Google photo > null
+        if (data.avatar_url) {
+          setProfilePhoto(data.avatar_url);
+        } else if (user?.user_metadata?.avatar_url || user?.user_metadata?.picture) {
+          setProfilePhoto(user.user_metadata.avatar_url || user.user_metadata.picture);
+        } else {
+          setProfilePhoto(null);
+        }
       }
     } catch (error: any) {
       toast.error(error.message || "Error fetching profile");
@@ -129,6 +141,111 @@ const Profile = () => {
       }
     } catch (error) {
       console.error("Error fetching stats:", error);
+    }
+  };
+
+  /**
+   * Handle profile photo upload
+   * Uploads photo to Supabase storage and updates profile
+   */
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user || !event.target.files || event.target.files.length === 0) return;
+
+    const file = event.target.files[0];
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    // Validate file size (2MB limit)
+    if (file.size > 2097152) {
+      toast.error("Image size must be less than 2MB");
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      // Delete old photo if exists
+      if (profilePhoto && profilePhoto.includes('profile-photos')) {
+        const oldPath = profilePhoto.split('/profile-photos/')[1];
+        await supabase.storage.from('profile-photos').remove([oldPath]);
+      }
+
+      // Upload new photo
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/avatar.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('profile-photos')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-photos')
+        .getPublicUrl(fileName);
+
+      // Update profile with new photo URL
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl })
+        .eq("id", user.id);
+
+      if (updateError) throw updateError;
+
+      setProfilePhoto(publicUrl);
+      toast.success("Profile photo updated successfully");
+      
+      // Refresh profile data
+      await fetchProfile(user.id);
+    } catch (error: any) {
+      console.error("Error uploading photo:", error);
+      toast.error(error.message || "Error uploading profile photo");
+    } finally {
+      setUploadingPhoto(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  /**
+   * Handle profile photo removal
+   * Removes photo from storage and profile
+   */
+  const handleRemovePhoto = async () => {
+    if (!user || !profilePhoto) return;
+
+    setUploadingPhoto(true);
+    try {
+      // Delete from storage if it's in our storage
+      if (profilePhoto.includes('profile-photos')) {
+        const path = profilePhoto.split('/profile-photos/')[1];
+        await supabase.storage.from('profile-photos').remove([path]);
+      }
+
+      // Update profile to remove avatar_url
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: null })
+        .eq("id", user.id);
+
+      if (error) throw error;
+
+      setProfilePhoto(null);
+      toast.success("Profile photo removed");
+      
+      // Refresh profile data
+      await fetchProfile(user.id);
+    } catch (error: any) {
+      console.error("Error removing photo:", error);
+      toast.error(error.message || "Error removing profile photo");
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
@@ -223,6 +340,72 @@ const Profile = () => {
               <CardDescription>Update your profile information</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Profile Photo Section */}
+              <div className="flex flex-col items-center gap-4 pb-4 border-b">
+                <div className="relative">
+                  {profilePhoto ? (
+                    <img 
+                      src={profilePhoto} 
+                      alt="Profile" 
+                      className="h-24 w-24 rounded-full object-cover border-4 border-primary/20"
+                    />
+                  ) : (
+                    <div className="h-24 w-24 rounded-full bg-muted flex items-center justify-center border-4 border-primary/20">
+                      <UserIcon className="h-12 w-12 text-muted-foreground" />
+                    </div>
+                  )}
+                  {profilePhoto && user?.app_metadata?.provider !== 'google' && (
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      onClick={handleRemovePhoto}
+                      disabled={uploadingPhoto}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  {user?.app_metadata?.provider !== 'google' && (
+                    <>
+                      <Label htmlFor="photo-upload" className="cursor-pointer">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          asChild
+                          disabled={uploadingPhoto}
+                        >
+                          <span>
+                            <Camera className="mr-2 h-4 w-4" />
+                            {uploadingPhoto ? "Uploading..." : profilePhoto ? "Change Photo" : "Upload Photo"}
+                          </span>
+                        </Button>
+                      </Label>
+                      <Input
+                        id="photo-upload"
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        className="hidden"
+                        ref={fileInputRef}
+                        onChange={handlePhotoUpload}
+                        disabled={uploadingPhoto}
+                      />
+                    </>
+                  )}
+                  <p className="text-xs text-muted-foreground text-center">
+                    {user?.app_metadata?.provider === 'google' 
+                      ? "Using Google profile picture. Upload disabled for Google accounts." 
+                      : "JPG, PNG or WEBP (max 2MB)"}
+                  </p>
+                  {user?.app_metadata?.provider === 'google' && (
+                    <p className="text-xs text-muted-foreground text-center">
+                      To change your photo, update it in your Google account.
+                    </p>
+                  )}
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" value={user?.email || ""} disabled />
