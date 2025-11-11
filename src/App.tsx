@@ -12,6 +12,8 @@ import PostItem from "./pages/PostItem";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import VerifyTables from "./pages/VerifyTables";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import { motion, AnimatePresence } from "framer-motion";
 import { AIChat } from "@/components/AIChat";
@@ -71,6 +73,8 @@ const AnimatedRoutes = () => {
         <Routes location={location}>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/lost" element={<Lost />} />
           <Route path="/found" element={<Found />} />
           <Route path="/post" element={<PostItem />} />
@@ -95,17 +99,33 @@ const OAuthCallbackHandler = () => {
 
   useEffect(() => {
     /**
-     * Handle OAuth callback
-     * When Supabase redirects back from OAuth provider, the access token is in the hash fragment
-     * We need to process this to complete the authentication
+     * Handle OAuth callback and password reset callback
+     * When Supabase redirects back from OAuth provider or password reset email,
+     * the access token is in the hash fragment or query params
+     * We need to process this to complete the authentication or password reset
      */
-    const handleOAuthCallback = async () => {
-      // Check if there's a hash fragment with OAuth tokens
+    const handleAuthCallback = async () => {
+      // Check if there's a hash fragment with tokens (OAuth or password reset)
       const hashParams = window.location.hash;
       
       if (hashParams && hashParams.includes('access_token')) {
         try {
-          // Get the session from the hash fragment
+          // Parse hash fragment to check if it's a password reset
+          const hash = hashParams.substring(1); // Remove the #
+          const params = new URLSearchParams(hash);
+          const type = params.get("type");
+          
+          // If it's a password reset, redirect to reset password page with hash
+          if (type === "recovery") {
+            // Keep the hash fragment for the reset password page
+            // Don't navigate if we're already on the reset password page
+            if (window.location.pathname !== "/reset-password") {
+              navigate(`/reset-password${hashParams}`);
+            }
+            return;
+          }
+
+          // Otherwise, it's OAuth - get the session from the hash fragment
           // Supabase automatically processes the hash fragment when we call getSession()
           const { data: { session }, error } = await supabase.auth.getSession();
           
@@ -120,12 +140,26 @@ const OAuthCallbackHandler = () => {
             navigate("/");
           }
         } catch (error) {
-          console.error("Error handling OAuth callback:", error);
+          console.error("Error handling auth callback:", error);
+        }
+      } else {
+        // Check for password reset in query params (fallback)
+        const searchParams = new URLSearchParams(window.location.search);
+        const type = searchParams.get("type");
+        const accessToken = searchParams.get("access_token");
+        
+        // If it's a password reset, redirect to reset password page
+        if (type === "recovery" && accessToken) {
+          // Don't navigate if we're already on the reset password page
+          if (window.location.pathname !== "/reset-password") {
+            navigate(`/reset-password?${searchParams.toString()}`);
+          }
+          return;
         }
       }
     };
 
-    handleOAuthCallback();
+    handleAuthCallback();
   }, [navigate]);
 
   return null; // This component doesn't render anything

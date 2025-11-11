@@ -92,12 +92,22 @@ export const Navbar = ({ darkMode, toggleDarkMode, user, position = "fixed", cus
    * Handle sign out and navigate to auth page
    */
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Error signing out");
-    } else {
-      toast.success("Signed out successfully");
-      handleNavigate("/auth");
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Sign out error:", error);
+        toast.error(`Error signing out: ${error.message}`);
+      } else {
+        // Clear any local state
+        setUserRole(null);
+        setProfilePhoto(null);
+        toast.success("Signed out successfully");
+        // Navigate immediately without delay for signout
+        navigate("/auth");
+      }
+    } catch (error: any) {
+      console.error("Sign out exception:", error);
+      toast.error(`Error signing out: ${error.message || "Unknown error"}`);
     }
   };
 
@@ -223,14 +233,20 @@ export const Navbar = ({ darkMode, toggleDarkMode, user, position = "fixed", cus
                       <DropdownMenuLabel>My Account</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => handleNavigate("/admin")}
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          handleNavigate("/admin");
+                        }}
                         className="cursor-pointer"
                       >
                         <Shield className="mr-2 h-4 w-4" />
                         <span>Admin Panel</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleNavigate("/profile")}
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          handleNavigate("/profile");
+                        }}
                         className="cursor-pointer"
                       >
                         <User className="mr-2 h-4 w-4" />
@@ -238,7 +254,10 @@ export const Navbar = ({ darkMode, toggleDarkMode, user, position = "fixed", cus
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={handleSignOut}
+                        onSelect={async (e) => {
+                          e.preventDefault();
+                          await handleSignOut();
+                        }}
                         className="cursor-pointer text-destructive focus:text-destructive"
                       >
                         <LogOut className="mr-2 h-4 w-4" />
