@@ -24,6 +24,14 @@ const Index = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [showGetStartedDialog, setShowGetStartedDialog] = useState(false);
   const navigate = useNavigate();
+  
+  // Statistics state
+  const [stats, setStats] = useState({
+    itemsBrowsed: 0,
+    successfulMatches: 0,
+    avgTimeToPost: "~5m",
+    alwaysAvailable: "24/7"
+  });
 
   // Testimonials data
   const testimonials = [
@@ -75,8 +83,75 @@ const Index = () => {
       setUser(session?.user ?? null);
     });
 
+    // Fetch real statistics
+    fetchStatistics();
+
     return () => subscription.unsubscribe();
   }, []);
+
+  const fetchStatistics = async () => {
+    try {
+      // Fetch total items count
+      const { count: itemsCount } = await supabase
+        .from("items")
+        .select("*", { count: "exact", head: true });
+
+      // Fetch successful matches count (confirmed status)
+      const { count: matchesCount } = await supabase
+        .from("matches")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "confirmed");
+
+      // Fetch items with created_at to calculate average time to post
+      const { data: items } = await supabase
+        .from("items")
+        .select("created_at, date_reported")
+        .order("created_at", { ascending: false })
+        .limit(100); // Sample last 100 items for performance
+
+      // Calculate average time to post (difference between date_reported and created_at)
+      let avgTimeMs = 0;
+      if (items && items.length > 0) {
+        const timeDiffs = items
+          .filter(item => item.created_at && item.date_reported)
+          .map(item => {
+            const created = new Date(item.created_at).getTime();
+            const reported = new Date(item.date_reported).getTime();
+            return Math.abs(created - reported);
+          })
+          .filter(diff => diff > 0 && diff < 3600000); // Filter out invalid or very large differences (max 1 hour)
+        
+        if (timeDiffs.length > 0) {
+          avgTimeMs = timeDiffs.reduce((sum, diff) => sum + diff, 0) / timeDiffs.length;
+        }
+      }
+
+      // Format average time
+      let avgTimeFormatted = "~5m";
+      if (avgTimeMs > 0) {
+        const minutes = Math.round(avgTimeMs / 60000);
+        if (minutes < 1) {
+          const seconds = Math.round(avgTimeMs / 1000);
+          avgTimeFormatted = `~${seconds}s`;
+        } else if (minutes < 60) {
+          avgTimeFormatted = `~${minutes}m`;
+        } else {
+          const hours = Math.round(minutes / 60);
+          avgTimeFormatted = `~${hours}h`;
+        }
+      }
+
+      setStats({
+        itemsBrowsed: itemsCount || 0,
+        successfulMatches: matchesCount || 0,
+        avgTimeToPost: avgTimeFormatted,
+        alwaysAvailable: "24/7"
+      });
+    } catch (error) {
+      console.error("Error fetching statistics:", error);
+      // Keep default values on error
+    }
+  };
 
   // Auto-slide testimonials from right to left
   useEffect(() => {
@@ -124,6 +199,14 @@ const Index = () => {
     }
   };
 
+  // Helper function to format numbers for display
+  const formatStatNumber = (num: number): string => {
+    if (num >= 1000) {
+      return `${(num / 1000).toFixed(1)}k+`;
+    }
+    return `${num}+`;
+  };
+
   return (
     <div className="min-h-screen bg-background relative overflow-x-hidden">
       {/* Full page gradient background */}
@@ -160,19 +243,25 @@ const Index = () => {
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <div className="rounded-xl border border-border bg-card p-5 text-center">
-            <div className="text-3xl font-bold">10k+</div>
+            <div className="text-3xl font-bold">
+              {formatStatNumber(stats.itemsBrowsed)}
+            </div>
             <div className="text-muted-foreground text-sm">Items browsed</div>
           </div>
           <div className="rounded-xl border border-border bg-card p-5 text-center">
-            <div className="text-3xl font-bold">1,200+</div>
+            <div className="text-3xl font-bold">
+              {formatStatNumber(stats.successfulMatches)}
+            </div>
             <div className="text-muted-foreground text-sm">Successful matches</div>
           </div>
           <div className="rounded-xl border border-border bg-card p-5 text-center">
-            <div className="text-3xl font-bold"><span className="align-middle">~</span>5m</div>
+            <div className="text-3xl font-bold">
+              <span className="align-middle">{stats.avgTimeToPost}</span>
+            </div>
             <div className="text-muted-foreground text-sm">Avg. time to post</div>
           </div>
           <div className="rounded-xl border border-border bg-card p-5 text-center">
-            <div className="text-3xl font-bold">24/7</div>
+            <div className="text-3xl font-bold">{stats.alwaysAvailable}</div>
             <div className="text-muted-foreground text-sm">Always available</div>
           </div>
         </motion.div>
