@@ -33,7 +33,6 @@ const PostItem = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
-  const [showVoiceAssistant, setShowVoiceAssistant] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   // State for full-screen image viewer
@@ -234,33 +233,19 @@ const PostItem = () => {
       
       <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} user={user} />
       
-      {/* Voice Assistant Modal */}
-      {showVoiceAssistant && (
-        <VoiceAssistant
-          onDataExtracted={handleVoiceDataExtracted}
-          onClose={() => setShowVoiceAssistant(false)}
-        />
-      )}
-
       <div className="container mx-auto px-4 py-8 pt-24 max-w-2xl relative z-10">
-        {/* Voice Assistant Button */}
-        <div className="mb-4 flex justify-end">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setShowVoiceAssistant(true)}
-            className="gap-2"
-          >
-            <Mic className="h-4 w-4" />
-            Use Voice Assistant
-          </Button>
-        </div>
 
         <Card>
           <CardHeader>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Voice Assistant */}
+              <div className="space-y-2">
+                <Label>Use Voice Assistant</Label>
+                <VoiceAssistant onDataExtracted={handleVoiceDataExtracted} />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="status">Item Status *</Label>
                 <Select

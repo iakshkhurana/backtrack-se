@@ -242,16 +242,32 @@ export async function extractItemDataFromVoice(transcript: string): Promise<Voic
   const prompt = {
     role: "system",
     content: `You are an assistant that extracts structured data from voice transcripts about lost or found items. 
-Return ONLY a valid JSON object with these keys (only include keys that are mentioned in the transcript):
-- status: "lost" or "found" (if mentioned)
-- title: Item name/title (if mentioned)
-- category: One of "phone", "keys", "stationery", "electronics", "wallet", "clothing", "other" (if mentioned)
-- description: Detailed description (if mentioned)
+The user will describe their item in natural language. Extract all available information.
+
+Return ONLY a valid JSON object with these keys (include all keys that are mentioned or can be inferred):
+- status: "lost" or "found" (REQUIRED - determine from context like "I lost", "I found", "reporting lost", etc.)
+- title: Item name/title (REQUIRED - extract the main item name, e.g., "iPhone 13", "blue wallet", "car keys")
+- category: One of "phone", "keys", "stationery", "electronics", "wallet", "clothing", "other" (REQUIRED - map to closest category)
+  * "phone" for phones, smartphones, mobile phones
+  * "keys" for keys, keychains
+  * "stationery" for pens, notebooks, books, stationery items
+  * "electronics" for laptops, tablets, headphones, chargers, electronic devices (except phones)
+  * "wallet" for wallets, purses
+  * "clothing" for clothes, jackets, bags, accessories
+  * "other" for anything else
+- description: Detailed description of the item including color, brand, model, condition, distinctive features (if mentioned)
 - location: Where item was lost/found (if mentioned)
-- contact_info: Phone number or email (if mentioned)
+- contact_info: Phone number or email (only if explicitly mentioned in this transcript)
+
+Be smart about extracting information. If user says "I lost my blue iPhone 13 at the library", extract:
+- status: "lost"
+- title: "Blue iPhone 13"
+- category: "phone"
+- location: "library"
+- description: "Blue iPhone 13"
 
 Return ONLY the JSON object, no other text. Example:
-{"status": "lost", "title": "Blue iPhone", "category": "phone", "contact_info": "123-456-7890"}`,
+{"status": "lost", "title": "Blue iPhone 13", "category": "phone", "description": "Blue iPhone 13 with black case", "location": "library"}`,
   };
 
   const userMessage = {
