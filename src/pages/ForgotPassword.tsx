@@ -26,20 +26,47 @@ const ForgotPassword = () => {
       emailSchema.parse({ email });
       setLoading(true);
 
+      // Construct redirect URL - make sure it matches your Supabase allowed redirect URLs
       const redirectUrl = `${window.location.origin}/reset-password`;
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      
+      console.log("Sending password reset email to:", email);
+      console.log("Redirect URL:", redirectUrl);
+
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Password reset error:", error);
+        console.error("Error details:", JSON.stringify(error, null, 2));
+        
+        // Provide more specific error messages
+        if (error.message?.includes("rate limit") || error.message?.includes("too many")) {
+          toast.error("Too many requests. Please wait a moment and try again.");
+        } else if (error.message?.includes("email") || error.message?.includes("user")) {
+          toast.error("Email not found. Please check your email address or sign up first.");
+        } else if (error.message?.includes("redirect") || error.message?.includes("URL")) {
+          toast.error("Configuration error. Please contact support.");
+          console.error("Redirect URL issue. Make sure to add this URL to Supabase Dashboard → Authentication → URL Configuration:", redirectUrl);
+        } else {
+          toast.error(error.message || "Error sending reset email. Please check your email address and try again.");
+        }
+        return;
+      }
 
+      // Supabase doesn't return an error even if email fails to send in some cases
+      // But if there's no error, we assume it was sent
+      console.log("Password reset request completed. Data:", data);
+      
+      // Always show success message (Supabase sends email even if user doesn't exist for security)
       setEmailSent(true);
-      toast.success("Password reset email sent! Please check your inbox.");
+      toast.success("If an account exists with this email, a password reset link has been sent. Please check your inbox and spam folder.");
     } catch (error: any) {
+      console.error("Password reset exception:", error);
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
       } else {
-        toast.error(error.message || "Error sending reset email");
+        toast.error(error.message || "Error sending reset email. Please try again.");
       }
     } finally {
       setLoading(false);
