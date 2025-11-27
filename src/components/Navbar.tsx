@@ -90,56 +90,57 @@ export const Navbar = ({ darkMode, toggleDarkMode, user, position = "fixed", cus
 
   /**
    * Handle sign out and navigate to auth page
-   * Gracefully handles cases where there's no active session
+   * Gracefully handles cases where there's no active session or API errors
+   * Uses full page reload to ensure all state is cleared and prevent redirect loops
    */
   const handleSignOut = async () => {
     try {
+      // Clear local state first to ensure UI updates immediately
+      setUserRole(null);
+      setProfilePhoto(null);
+      
       // Check if there's an active session before attempting to sign out
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        // No active session, just clear local state and navigate
-        setUserRole(null);
-        setProfilePhoto(null);
-        navigate("/auth");
+        // No active session, force full page reload to auth page
+        window.location.href = "/auth";
         return;
       }
 
       // Attempt to sign out if session exists
-      const { error } = await supabase.auth.signOut();
+      // Use scope: 'local' to sign out from current device only (avoids 403 on some configurations)
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
       
       if (error) {
-        // Check if error is due to missing session (already signed out)
-        if (error.message?.includes("Auth session missing") || error.message?.includes("session missing")) {
-          // User is already signed out, just clear state and navigate
-          setUserRole(null);
-          setProfilePhoto(null);
-          navigate("/auth");
+        // Log error but don't block navigation
+        console.warn("Sign out error (continuing anyway):", error);
+        
+        // Check for specific error types that indicate user is already signed out
+        const isSessionError = 
+          error.message?.includes("Auth session missing") || 
+          error.message?.includes("session missing") ||
+          error.message?.includes("Forbidden") ||
+          error.status === 403;
+        
+        if (isSessionError) {
+          // User is already signed out or session invalid, force reload
+          window.location.href = "/auth";
           return;
         }
-        
-        console.error("Sign out error:", error);
-        toast.error(`Error signing out: ${error.message}`);
-      } else {
-        // Clear any local state
-        setUserRole(null);
-        setProfilePhoto(null);
-        toast.success("Signed out successfully");
-        // Navigate immediately without delay for signout
-        navigate("/auth");
-      }
-    } catch (error: any) {
-      // Handle "Auth session missing" error gracefully
-      if (error?.message?.includes("Auth session missing") || error?.message?.includes("session missing")) {
-        // User is already signed out, just clear state and navigate
-        setUserRole(null);
-        setProfilePhoto(null);
-        navigate("/auth");
-        return;
       }
       
-      console.error("Sign out exception:", error);
-      toast.error(`Error signing out: ${error.message || "Unknown error"}`);
+      // Use full page reload to ensure all state is cleared
+      // This prevents the Auth page from redirecting back to home if session state is cached
+      window.location.href = "/auth";
+      
+    } catch (error: any) {
+      // Log error but always navigate to auth page
+      console.warn("Sign out exception (continuing anyway):", error);
+      
+      // Always force full page reload to auth page, even on errors
+      // This ensures the user can always sign out from the UI perspective
+      window.location.href = "/auth";
     }
   };
 
