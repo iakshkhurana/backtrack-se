@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Navbar } from "@/components/Navbar";
 import { ItemCard } from "@/components/ItemCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,7 +12,6 @@ const Lost = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [items, setItems] = useState<any[]>([]);
-  const [filteredItems, setFilteredItems] = useState<any[]>([]);
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -40,62 +39,78 @@ const Lost = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
-    filterItems();
-  }, [categoryFilter, searchQuery, items]);
 
   /**
    * Fetch lost items from the database
    * Includes claim_status field to show claimed status
+   * Optimized query with only necessary fields
    */
   const fetchLostItems = async () => {
-    const { data, error } = await supabase
-      .from("items")
-      .select("*")
-      .eq("status", "lost")
-      .order("date_reported", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("items")
+        .select("id, title, description, category, location, date_reported, image_url, user_id, claim_status, status, contact_info")
+        .eq("status", "lost")
+        .order("date_reported", { ascending: false });
 
-    if (!error && data) {
-      setItems(data);
+      if (!error && data) {
+        setItems(data);
+      } else if (error) {
+        console.error("Error fetching lost items:", error);
+      }
+    } catch (error) {
+      console.error("Error fetching lost items:", error);
     }
   };
 
   /**
    * Filter and sort items
    * Filters by category and search query, then sorts so claimed items appear at the end
-   * Within each group (unclaimed/claimed), items are sorted by date_reported (newest first)
+   * Optimized for performance - uses efficient single-pass filtering and sorting
    */
-  const filterItems = () => {
+  const filterItems = useMemo(() => {
+    // Early return if no items
+    if (items.length === 0) {
+      return [];
+    }
+
     let filtered = items;
 
+    // Apply category filter first (most selective)
     if (categoryFilter !== "all") {
       filtered = filtered.filter(item => item.category === categoryFilter);
     }
 
+    // Apply search query filter
     if (searchQuery) {
+      const queryLower = searchQuery.toLowerCase();
       filtered = filtered.filter(item =>
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description?.toLowerCase().includes(searchQuery.toLowerCase())
+        item.title.toLowerCase().includes(queryLower) ||
+        item.description?.toLowerCase().includes(queryLower)
       );
     }
 
-    // Sort items: unclaimed items first (sorted by date_reported desc), then claimed items (sorted by date_reported desc)
-    filtered.sort((a, b) => {
-      const aIsClaimed = a.claim_status === "claimed";
-      const bIsClaimed = b.claim_status === "claimed";
-      
+    // Optimized single-pass sort: unclaimed first, then claimed, both by date
+    // Pre-compute date timestamps for faster comparison
+    const itemsWithTimestamps = filtered.map(item => ({
+      item,
+      timestamp: new Date(item.date_reported).getTime(),
+      isClaimed: item.claim_status === "claimed"
+    }));
+
+    // Single sort pass: unclaimed items first (isClaimed=false), then by date
+    itemsWithTimestamps.sort((a, b) => {
       // If one is claimed and the other isn't, unclaimed comes first
-      if (aIsClaimed && !bIsClaimed) return 1;
-      if (!aIsClaimed && bIsClaimed) return -1;
-      
-      // If both have the same claim status, sort by date_reported (newest first)
-      const dateA = new Date(a.date_reported).getTime();
-      const dateB = new Date(b.date_reported).getTime();
-      return dateB - dateA;
+      if (a.isClaimed !== b.isClaimed) {
+        return a.isClaimed ? 1 : -1;
+      }
+      // Both have same claim status, sort by date (newest first)
+      return b.timestamp - a.timestamp;
     });
 
-    setFilteredItems(filtered);
-  };
+    // Extract items from sorted array
+    return itemsWithTimestamps.map(entry => entry.item);
+  }, [items, categoryFilter, searchQuery]);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -138,17 +153,18 @@ const Lost = () => {
           </Select>
         </div>
 
-        {filteredItems.length === 0 ? (
+        {filterItems.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <p className="text-lg">No lost items found</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItems.map((item) => (
+            {filterItems.map((item) => (
               <ItemCard 
                 key={item.id} 
                 item={item} 
                 currentUserId={user?.id}
+                currentUserEmail={user?.email}
                 onDelete={fetchLostItems}
                 onUpdate={fetchLostItems}
               />

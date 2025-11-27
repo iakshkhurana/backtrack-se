@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { User as UserIcon, Mail, Calendar, Package, MessageSquare, Bell, Camera, X } from "lucide-react";
+import { User as UserIcon, Mail, Calendar, Package, MessageSquare, Bell, Camera, X, CheckCircle2, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { LoaderOne } from "@/components/ui/loader";
 
@@ -20,6 +21,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [stats, setStats] = useState<any>(null);
+  const [claimRequests, setClaimRequests] = useState<any[]>([]);
+  const [loadingClaims, setLoadingClaims] = useState(false);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -48,6 +51,7 @@ const Profile = () => {
       if (session?.user) {
         fetchProfile(session.user.id);
         fetchStats(session.user.id);
+        fetchClaimRequests(session.user.id);
       } else {
         navigate("/auth");
       }
@@ -59,6 +63,7 @@ const Profile = () => {
         setLoading(true);
         fetchProfile(session.user.id);
         fetchStats(session.user.id);
+        fetchClaimRequests(session.user.id);
       } else {
         navigate("/auth");
       }
@@ -141,6 +146,91 @@ const Profile = () => {
       }
     } catch (error) {
       console.error("Error fetching stats:", error);
+    }
+  };
+
+  /**
+   * Fetch claim requests for user's items
+   * Shows all pending claims for items owned by the user
+   */
+  const fetchClaimRequests = async (userId: string) => {
+    setLoadingClaims(true);
+    try {
+      // Get all items owned by this user
+      const { data: userItems, error: itemsError } = await supabase
+        .from("items")
+        .select("id")
+        .eq("user_id", userId);
+
+      if (itemsError || !userItems || userItems.length === 0) {
+        setClaimRequests([]);
+        return;
+      }
+
+      const userItemIds = userItems.map(item => item.id);
+
+      // Get all pending claims for these items
+      const { data: claimsData, error } = await supabase
+        .from("claims")
+        .select(`
+          id,
+          item_id,
+          claimant_id,
+          verification_details,
+          status,
+          created_at,
+          items:item_id (
+            id,
+            title,
+            status,
+            category
+          )
+        `)
+        .in("item_id", userItemIds)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching claims:", error);
+        setClaimRequests([]);
+        return;
+      }
+
+      if (claimsData && claimsData.length > 0) {
+        // Get claimant profiles for all unique claimant IDs
+        const claimantIds = [...new Set(claimsData.map((claim: any) => claim.claimant_id))];
+        
+        const { data: claimantProfiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", claimantIds);
+
+        // Create a map for quick lookup
+        const profileMap = new Map();
+        if (claimantProfiles) {
+          claimantProfiles.forEach((profile: any) => {
+            profileMap.set(profile.id, profile);
+          });
+        }
+
+        // Combine claims with profile data
+        const claimsWithProfiles = claimsData.map((claim: any) => {
+          const profile = profileMap.get(claim.claimant_id);
+          return {
+            ...claim,
+            profiles: profile || { full_name: "Unknown User" }
+          };
+        });
+
+        setClaimRequests(claimsWithProfiles);
+      } else {
+        setClaimRequests([]);
+      }
+    } catch (error) {
+      console.error("Error fetching claim requests:", error);
+      setClaimRequests([]);
+    } finally {
+      setLoadingClaims(false);
     }
   };
 
@@ -432,6 +522,79 @@ const Profile = () => {
               <Button onClick={handleUpdateProfile} disabled={updating}>
                 {updating ? "Updating..." : "Update Profile"}
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Claim Requests */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Claim Requests
+              </CardTitle>
+              <CardDescription>View who has requested to claim your items</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingClaims ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Loading claim requests...
+                </div>
+              ) : claimRequests.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <CheckCircle2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No pending claim requests</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {claimRequests.map((claim: any) => (
+                    <Card key={claim.id} className="border-l-4 border-l-primary">
+                      <CardContent className="pt-6">
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-lg">
+                                {claim.items?.title || "Item"}
+                              </h4>
+                              <p className="text-sm text-muted-foreground">
+                                Category: {claim.items?.category || "N/A"} • Status: {claim.items?.status || "N/A"}
+                              </p>
+                            </div>
+                            <Badge variant="outline" className="bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800">
+                              Pending
+                            </Badge>
+                          </div>
+                          
+                          <div className="space-y-2 pt-2 border-t">
+                            <div className="flex items-center gap-2">
+                              <UserIcon className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">
+                                <span className="font-medium">
+                                  {claim.profiles?.full_name || "Unknown User"}
+                                </span>
+                                {" "}requested to claim this item
+                              </span>
+                            </div>
+                            
+                            {claim.verification_details && (
+                              <div className="mt-2 p-3 bg-muted rounded-md">
+                                <p className="text-xs font-medium mb-1">Verification Details:</p>
+                                <p className="text-sm">{claim.verification_details}</p>
+                              </div>
+                            )}
+                            
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
+                              <Calendar className="h-3 w-3" />
+                              <span>
+                                Requested on {new Date(claim.created_at).toLocaleDateString()} at {new Date(claim.created_at).toLocaleTimeString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 

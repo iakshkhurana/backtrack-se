@@ -27,11 +27,12 @@ interface ItemCardProps {
     claim_status?: string | null;
   };
   currentUserId?: string;
+  currentUserEmail?: string;
   onDelete?: () => void;
   onUpdate?: () => void;
 }
 
-export const ItemCard = ({ item, currentUserId, onDelete, onUpdate }: ItemCardProps) => {
+export const ItemCard = ({ item, currentUserId, currentUserEmail, onDelete, onUpdate }: ItemCardProps) => {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showClaimDialog, setShowClaimDialog] = useState(false);
@@ -127,21 +128,24 @@ export const ItemCard = ({ item, currentUserId, onDelete, onUpdate }: ItemCardPr
         return;
       }
 
-      // Update item claim_status to 'pending' if it's currently 'open'
+      // Update item claim_status to 'pending' if it's not already 'claimed'
       if (claimData) {
-        const { error: updateError } = await supabase
-          .from("items")
-          .update({ claim_status: "pending" })
-          .eq("id", item.id)
-          .eq("claim_status", "open"); // Only update if currently 'open'
+        // Only update if not already claimed
+        if (item.claim_status !== "claimed") {
+          const { error: updateError } = await supabase
+            .from("items")
+            .update({ claim_status: "pending" })
+            .eq("id", item.id);
 
-        if (updateError) {
-          console.warn("Could not update item claim_status:", updateError);
-          // Don't fail the claim if this update fails
+          if (updateError) {
+            console.warn("Could not update item claim_status:", updateError);
+            // Don't fail the claim if this update fails
+          }
         }
+
       }
 
-      toast.success("Claim request submitted successfully!");
+      toast.success("Claim request submitted successfully! The item owner will be notified.");
       setShowClaimDialog(false);
       setVerificationDetails("");
     } catch (error: any) {
@@ -307,7 +311,20 @@ export const ItemCard = ({ item, currentUserId, onDelete, onUpdate }: ItemCardPr
             </div>
           </div>
         )}
-        {canClaim && (
+        {/* Show grey "Claimed" button if item is already claimed */}
+        {isClaimed && (
+          <Button
+            disabled
+            className="w-full mt-4 bg-muted text-muted-foreground cursor-not-allowed"
+            variant="outline"
+          >
+            <CheckCircle2 className="mr-2 h-4 w-4" />
+            Claimed
+          </Button>
+        )}
+        
+        {/* Show claim button only if item is not claimed and user can claim */}
+        {canClaim && !isClaimed && (
           <Button
             onClick={() => setShowClaimDialog(true)}
             className="w-full mt-4"
@@ -317,7 +334,9 @@ export const ItemCard = ({ item, currentUserId, onDelete, onUpdate }: ItemCardPr
             Claim This Item
           </Button>
         )}
-        {canMarkAsClaimed && (
+        
+        {/* Show mark as claimed/returned button for owner */}
+        {canMarkAsClaimed && !isClaimed && (
           <Button
             onClick={() => setShowMarkClaimedDialog(true)}
             className="w-full mt-4"
