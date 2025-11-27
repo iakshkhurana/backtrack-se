@@ -154,7 +154,8 @@ export const ItemCard = ({ item, currentUserId, onDelete, onUpdate }: ItemCardPr
 
   /**
    * Handle marking item as claimed
-   * Updates the item's claim_status to 'claimed' when the owner finds their lost item
+   * For lost items: Updates claim_status when the owner finds their lost item
+   * For found items: Updates claim_status when the founder returns the item to its original owner
    */
   const handleMarkAsClaimed = async () => {
     if (!currentUserId) {
@@ -176,7 +177,11 @@ export const ItemCard = ({ item, currentUserId, onDelete, onUpdate }: ItemCardPr
         return;
       }
 
-      toast.success("Item marked as claimed successfully!");
+      const successMessage = item.status === "lost" 
+        ? "Item marked as claimed successfully! Great that you found it!"
+        : "Item marked as returned! Thank you for helping reunite it with its owner!";
+      
+      toast.success(successMessage);
       setShowMarkClaimedDialog(false);
       onUpdate?.(); // Refresh the items list
     } catch (error: any) {
@@ -190,7 +195,8 @@ export const ItemCard = ({ item, currentUserId, onDelete, onUpdate }: ItemCardPr
   const isOwner = currentUserId && currentUserId === item.user_id;
   const canClaim = currentUserId && !isOwner && item.status === "found";
   const isClaimed = item.claim_status === "claimed";
-  const canMarkAsClaimed = isOwner && !isClaimed && item.status === "lost";
+  // Owner can mark as claimed for both lost items (when found) and found items (when returned to owner)
+  const canMarkAsClaimed = isOwner && !isClaimed && (item.status === "lost" || item.status === "found");
   
   /**
    * Parse contact info to extract name and phone number
@@ -318,7 +324,9 @@ export const ItemCard = ({ item, currentUserId, onDelete, onUpdate }: ItemCardPr
             variant="default"
           >
             <CheckCircle2 className="mr-2 h-4 w-4" />
-            Mark as Claimed
+            {item.status === "lost" 
+              ? "Mark as Claimed" 
+              : "Mark as Returned to Owner"}
           </Button>
         )}
       </CardContent>
@@ -360,9 +368,13 @@ export const ItemCard = ({ item, currentUserId, onDelete, onUpdate }: ItemCardPr
         open={showMarkClaimedDialog}
         onOpenChange={setShowMarkClaimedDialog}
         onConfirm={handleMarkAsClaimed}
-        title="Mark Item as Claimed"
-        description="Are you sure you want to mark this item as claimed? This will indicate that you have found your lost item."
-        confirmText="Mark as Claimed"
+        title={item.status === "lost" ? "Mark Item as Claimed" : "Return Item to Owner"}
+        description={
+          item.status === "lost" 
+            ? "Are you sure you want to mark this item as claimed? This will indicate that you have found your lost item."
+            : "You found this item that was lost by someone else. Have you returned it to its original owner? Marking this as returned will indicate that the person who lost this item has received it back from you."
+        }
+        confirmText={item.status === "lost" ? "Mark as Claimed" : "Yes, Returned to Owner"}
         cancelText="Cancel"
         variant="default"
         isLoading={markingAsClaimed}
