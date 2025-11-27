@@ -86,9 +86,34 @@ const Index = () => {
     // Fetch real statistics
     fetchStatistics();
 
-    return () => subscription.unsubscribe();
+    // Set up real-time subscription to update stats when items are claimed
+    const itemsChannel = supabase
+      .channel('items-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'items',
+          filter: 'claim_status=eq.claimed'
+        },
+        () => {
+          // Refresh statistics when an item is marked as claimed
+          fetchStatistics();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+      supabase.removeChannel(itemsChannel);
+    };
   }, []);
 
+  /**
+   * Fetch statistics from the database
+   * Updates items browsed count and successful matches (claimed items)
+   */
   const fetchStatistics = async () => {
     try {
       // Fetch total items count
@@ -96,11 +121,11 @@ const Index = () => {
         .from("items")
         .select("*", { count: "exact", head: true });
 
-      // Fetch successful matches count (confirmed status)
-      const { count: matchesCount } = await supabase
-        .from("matches")
+      // Fetch successful matches count (items marked as claimed)
+      const { count: claimedCount } = await supabase
+        .from("items")
         .select("*", { count: "exact", head: true })
-        .eq("status", "confirmed");
+        .eq("claim_status", "claimed");
 
       // Fetch items with created_at to calculate average time to post
       const { data: items } = await supabase
@@ -143,7 +168,7 @@ const Index = () => {
 
       setStats({
         itemsBrowsed: itemsCount || 0,
-        successfulMatches: matchesCount || 0,
+        successfulMatches: claimedCount || 0,
         avgTimeToPost: avgTimeFormatted,
         alwaysAvailable: "24/7"
       });
