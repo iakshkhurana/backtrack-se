@@ -44,6 +44,10 @@ const Found = () => {
     filterItems();
   }, [categoryFilter, searchQuery, items]);
 
+  /**
+   * Fetch found items from the database
+   * Includes claim_status field to show claimed status
+   */
   const fetchFoundItems = async () => {
     const { data, error } = await supabase
       .from("items")
@@ -56,6 +60,11 @@ const Found = () => {
     }
   };
 
+  /**
+   * Filter and sort items
+   * Filters by category and search query, then sorts so claimed items appear at the end
+   * Within each group (unclaimed/claimed), items are sorted by date_reported (newest first)
+   */
   const filterItems = () => {
     let filtered = items;
 
@@ -69,6 +78,21 @@ const Found = () => {
         item.description?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
+
+    // Sort items: unclaimed items first (sorted by date_reported desc), then claimed items (sorted by date_reported desc)
+    filtered.sort((a, b) => {
+      const aIsClaimed = a.claim_status === "claimed";
+      const bIsClaimed = b.claim_status === "claimed";
+      
+      // If one is claimed and the other isn't, unclaimed comes first
+      if (aIsClaimed && !bIsClaimed) return 1;
+      if (!aIsClaimed && bIsClaimed) return -1;
+      
+      // If both have the same claim status, sort by date_reported (newest first)
+      const dateA = new Date(a.date_reported).getTime();
+      const dateB = new Date(b.date_reported).getTime();
+      return dateB - dateA;
+    });
 
     setFilteredItems(filtered);
   };
@@ -126,6 +150,7 @@ const Found = () => {
                 item={item} 
                 currentUserId={user?.id}
                 onDelete={fetchFoundItems}
+                onUpdate={fetchFoundItems}
               />
             ))}
           </div>

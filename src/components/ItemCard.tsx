@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CategoryBadge } from "./CategoryBadge";
-import { MapPin, Calendar, User, Trash2, CheckCircle, Maximize2, X } from "lucide-react";
+import { MapPin, Calendar, User, Trash2, CheckCircle, Maximize2, X, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,7 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 interface ItemCardProps {
   item: {
@@ -23,17 +24,21 @@ interface ItemCardProps {
     image_url: string | null;
     contact_info: string | null;
     user_id: string;
+    claim_status?: string | null;
   };
   currentUserId?: string;
   onDelete?: () => void;
+  onUpdate?: () => void;
 }
 
-export const ItemCard = ({ item, currentUserId, onDelete }: ItemCardProps) => {
+export const ItemCard = ({ item, currentUserId, onDelete, onUpdate }: ItemCardProps) => {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showClaimDialog, setShowClaimDialog] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [verificationDetails, setVerificationDetails] = useState("");
+  const [markingAsClaimed, setMarkingAsClaimed] = useState(false);
+  const [showMarkClaimedDialog, setShowMarkClaimedDialog] = useState(false);
   // State for full-screen image viewer
   const [showImageFullscreen, setShowImageFullscreen] = useState(false);
 
@@ -147,8 +152,45 @@ export const ItemCard = ({ item, currentUserId, onDelete }: ItemCardProps) => {
     }
   };
 
+  /**
+   * Handle marking item as claimed
+   * Updates the item's claim_status to 'claimed' when the owner finds their lost item
+   */
+  const handleMarkAsClaimed = async () => {
+    if (!currentUserId) {
+      toast.error("Please sign in to mark items as claimed");
+      return;
+    }
+
+    setMarkingAsClaimed(true);
+    try {
+      const { error } = await supabase
+        .from("items")
+        .update({ claim_status: "claimed" })
+        .eq("id", item.id)
+        .eq("user_id", currentUserId); // Ensure only owner can mark as claimed
+
+      if (error) {
+        console.error("Error marking as claimed:", error);
+        toast.error(error.message || "Error marking item as claimed");
+        return;
+      }
+
+      toast.success("Item marked as claimed successfully!");
+      setShowMarkClaimedDialog(false);
+      onUpdate?.(); // Refresh the items list
+    } catch (error: any) {
+      console.error("Unexpected error in handleMarkAsClaimed:", error);
+      toast.error(error.message || "Error marking item as claimed");
+    } finally {
+      setMarkingAsClaimed(false);
+    }
+  };
+
   const isOwner = currentUserId && currentUserId === item.user_id;
   const canClaim = currentUserId && !isOwner && item.status === "found";
+  const isClaimed = item.claim_status === "claimed";
+  const canMarkAsClaimed = isOwner && !isClaimed && item.status === "lost";
   
   /**
    * Parse contact info to extract name and phone number
@@ -193,7 +235,15 @@ export const ItemCard = ({ item, currentUserId, onDelete }: ItemCardProps) => {
           <div className="flex-1">
             <div className="flex items-start justify-between gap-2 mb-2">
               <CardTitle className="text-xl">{item.title}</CardTitle>
-              <CategoryBadge category={item.category} />
+              <div className="flex items-center gap-2">
+                {isClaimed && (
+                  <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-white">
+                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                    Claimed
+                  </Badge>
+                )}
+                <CategoryBadge category={item.category} />
+              </div>
             </div>
             {item.description && (
               <CardDescription className="line-clamp-2">
@@ -261,6 +311,16 @@ export const ItemCard = ({ item, currentUserId, onDelete }: ItemCardProps) => {
             Claim This Item
           </Button>
         )}
+        {canMarkAsClaimed && (
+          <Button
+            onClick={() => setShowMarkClaimedDialog(true)}
+            className="w-full mt-4"
+            variant="default"
+          >
+            <CheckCircle2 className="mr-2 h-4 w-4" />
+            Mark as Claimed
+          </Button>
+        )}
       </CardContent>
 
       {/* Claim Dialog */}
@@ -294,6 +354,19 @@ export const ItemCard = ({ item, currentUserId, onDelete }: ItemCardProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Mark as Claimed Confirmation Dialog */}
+      <ConfirmDialog
+        open={showMarkClaimedDialog}
+        onOpenChange={setShowMarkClaimedDialog}
+        onConfirm={handleMarkAsClaimed}
+        title="Mark Item as Claimed"
+        description="Are you sure you want to mark this item as claimed? This will indicate that you have found your lost item."
+        confirmText="Mark as Claimed"
+        cancelText="Cancel"
+        variant="default"
+        isLoading={markingAsClaimed}
+      />
 
       {/* Full-Screen Image Viewer Dialog */}
       <Dialog open={showImageFullscreen} onOpenChange={setShowImageFullscreen}>
