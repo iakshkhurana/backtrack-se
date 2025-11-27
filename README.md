@@ -1,224 +1,358 @@
-# BackTrack Campus Find 🎓
+# BackTrack Campus Find
 
-A comprehensive web application for posting and searching lost & found items on campus. This tool automates the process of finding and reporting lost items, making it easier for students to reunite with their belongings.
+An intelligent lost & found management system built with React and Supabase that leverages AI to automate item discovery, voice-based posting, and smart matching between lost and found items.
 
-## 🚀 Features
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-akshkhurana.store-blue)](https://akshkhurana.store)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-black)](https://github.com/iakshkhurana/backtrack-se)
+[![Demo Video](https://img.shields.io/badge/Demo%20Video-YouTube-red)](https://youtu.be/7kxbCZLdLis)
 
-### Smart Search & Discovery
-- **AI-Powered Search**: Find items using natural language queries with intelligent keyword extraction
-- **Category Filtering**: Browse items by category (Phone, Keys, Stationery, Electronics, Wallet, Clothing, Other)
-- **Advanced Filters**: Filter by status (Lost/Found), location, and date
-- **Smart Matching**: AI-powered matching system to connect lost items with their owners
+[View Live Demo](https://akshkhurana.store) | [Watch Demo Video](https://youtu.be/7kxbCZLdLis)
 
-### Item Management
-- **Easy Posting**: Post lost or found items with photos, descriptions, and location details
-- **Image Analysis**: Automatic extraction of item details from uploaded images using Vision AI
-- **Voice Assistant**: Post items using voice commands - just speak and the AI fills in the details
-- **Item Claiming**: Submit claims for found items with verification details
+## Tech Stack
 
-### User Experience
-- **Modern Interface**: Beautiful, responsive UI with smooth animations and transitions
-- **Dark Mode**: Toggle between light and dark themes for comfortable viewing
-- **Real-time Updates**: Live updates for new items and notifications
-- **User Dashboard**: Personal profile with statistics and item management
-- **Secure Authentication**: Sign in with Google OAuth or email/password
+**Frontend:** React • TypeScript • Vite • Tailwind CSS • Supabase • OpenRouter AI
 
-### AI Features
-- **AI Chat Assistant**: Interactive chat interface for finding items using conversational queries
-- **Voice Posting**: Post items hands-free using voice commands
-- **Image Recognition**: Automatically identify items from photos
-- **Smart Suggestions**: Get intelligent suggestions based on your search history
+**Backend:** Supabase (PostgreSQL • Authentication • Storage • Real-time)
 
-## 📋 Prerequisites
+**AI Services:** OpenRouter API (GPT-4o-mini) • Web Speech API
 
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-- Internet connection
-- Google account (optional, for OAuth login)
+## Overview
 
-## 🚀 Getting Started
+BackTrack Campus Find simplifies the process of reuniting students with their lost belongings by eliminating manual searching and providing intelligent matching through AI-powered features. Users can post lost/found items, search using natural language, upload photos for automatic analysis, and use voice commands—all powered by modern web technologies and AI.
 
-### For End Users
+**📹 [Watch Demo Video](https://youtu.be/7kxbCZLdLis)** - See BackTrack in action!
 
-1. **Visit the Application**: Navigate to [backtrack-se.vercel.app](https://backtrack-se.vercel.app)
-2. **Create an Account**: Sign up with Google or email/password
-3. **Start Using**: Browse lost and found items or post your own
+## Key Features
 
-### Quick Start Guide
+**Secure Authentication** - Supabase Auth with email/password and Google OAuth support
 
-#### Posting a Lost Item
+**AI-Powered Search** - Natural language search with intelligent keyword extraction using OpenRouter API (GPT-4o-mini)
 
-1. Click **"Post Item"** in the navigation bar
-2. Select **"Lost"** as the status
-3. Fill in the details:
-   - Item name and category
-   - Description and location
-   - Upload a photo (optional)
-4. **Pro Tip**: Use the "Analyze image with AI" button to auto-fill details from your photo
-5. Click **"Submit"** to post
+**Voice-Enabled Item Posting** - Hands-free item posting with speech-to-text and AI-powered form filling via Web Speech API and OpenRouter
 
-#### Posting a Found Item
+**Smart Item Management** - Create, edit, delete items with automatic categorization (Phone, Keys, Stationery, Electronics, Wallet, Clothing, Other)
 
-1. Click **"Post Item"** in the navigation bar
-2. Select **"Found"** as the status
-3. Fill in the details about the item you found
-4. Upload a photo if possible
-5. Click **"Submit"** to help reunite the item with its owner
+**AI Image Analysis** - Upload photos and automatically extract item details (title, description, category) using Vision AI
 
-#### Finding Items
+**AI Chat Assistant** - Interactive chatbot for finding items using conversational queries with access to real item data
 
-1. Navigate to **"Lost Items"** or **"Found Items"** pages
-2. Use the search bar to find items by keywords
-3. Filter by category to narrow down results
-4. Click on an item to view details
-5. Click **"Claim This Item"** if you found your lost item
+**Item Claiming System** - Submit claims for found items with verification details and status tracking
 
-#### Using Voice Assistant
+**Advanced Filtering** - Filter items by category, search by keywords, and sort by date with automatic claimed items sorting
 
-1. Go to **"Post Item"** page
-2. Click **"Use Voice Assistant"** button
-3. Follow the voice prompts to describe your item
-4. The AI will automatically fill in the form based on your voice input
+**Real-time Updates** - Live updates for new items using Supabase real-time subscriptions
 
-#### Using AI Chat
+**Modern UI/UX** - Beautiful, responsive interface with dark mode, smooth animations, and mobile-first design
 
-1. Click the **AI Chat** icon in the bottom right corner
-2. Type your query in natural language (e.g., "I lost my blue iPhone near the library")
-3. The AI will help you find matching items
+**Admin Panel** - Comprehensive admin dashboard for managing items, claims, and user roles
 
-## 📖 Usage Guide
+## Tech Stack
 
-### Browsing Items
+### Frontend
 
-- **Lost Items Page**: View all reported lost items
-- **Found Items Page**: View all reported found items
-- **Search Bar**: Search across all items using keywords
-- **Category Filters**: Filter items by category for easier browsing
+**Framework:** React 18 with TypeScript
 
-### Posting Items
+**Build Tool:** Vite 5
 
-- **Status Selection**: Choose whether you're reporting a lost or found item
-- **Category Selection**: Select the appropriate category for better discoverability
-- **Image Upload**: Upload clear photos to help others identify the item
-- **Location Details**: Provide specific location information for better matching
+**State Management:** React Hooks, React Query (TanStack Query)
 
-### Claiming Items
+**UI Library:** Radix UI components with Tailwind CSS 4
 
-- **Verification**: Provide details to verify ownership
-- **Contact**: The item owner will be notified of your claim
-- **Follow-up**: Check your profile for claim status updates
+**Forms:** React Hook Form with Zod validation
 
-### Profile Management
+**Routing:** React Router DOM v6
 
-- **Dashboard**: View your posted items and statistics
-- **Item Management**: Edit or delete your posted items
-- **Claim History**: Track your submitted claims
+**Animations:** Framer Motion
 
-## 🎯 Use Cases
+**Charts:** Recharts (for admin analytics)
 
-### For Students
+**Voice:** Web Speech API (browser-native)
 
-- **Lost Your Phone?**: Post it on BackTrack and get notified when someone finds it
-- **Found Something?**: Help reunite lost items with their owners
-- **Quick Search**: Use AI chat to quickly find items using natural language
+**Styling:** Tailwind CSS with custom animations and shadcn/ui components
 
-### For Campus Administrators
+### Backend
 
-- **Centralized System**: All lost and found items in one place
-- **Easy Management**: Simple interface for managing items
-- **Statistics**: Track lost and found item statistics
+**Platform:** Supabase (Backend-as-a-Service)
 
-### For Campus Security
+**Database:** PostgreSQL (via Supabase)
 
-- **Quick Reporting**: Students can quickly report lost items
-- **Efficient Matching**: AI-powered matching helps connect items with owners
-- **Photo Verification**: Image uploads help verify ownership
+**Authentication:** Supabase Auth (JWT-based with OAuth)
 
-## 🔧 Features in Detail
+**File Storage:** Supabase Storage
+
+**Real-time:** Supabase Realtime subscriptions
+
+**AI Services:**
+- OpenRouter API (GPT-4o-mini) for AI chat, voice parsing, and image analysis
+- Web Speech API for browser-native speech recognition
+
+**Validation:** Zod schemas
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm, yarn, or bun
+- Supabase account
+- OpenRouter API key (for AI features)
+
+### Installation
+
+Clone the repository
+
+```bash
+git clone https://github.com/iakshkhurana/backtrack-se.git
+cd backtrack-se
+```
+
+Install dependencies
+
+```bash
+npm install
+# or
+yarn install
+# or
+bun install
+```
+
+### Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+# Supabase Configuration
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+
+# AI Services (OpenRouter)
+VITE_OPENROUTER_API_KEY=your_openrouter_api_key
+```
+
+**Getting Your Keys:**
+
+1. **Supabase:**
+   - Create a project at [supabase.com](https://supabase.com)
+   - Go to Project Settings → API
+   - Copy the Project URL and anon/public key
+
+2. **OpenRouter:**
+   - Sign up at [openrouter.ai](https://openrouter.ai)
+   - Get your API key from the dashboard
+   - Add credits to your account (required for API usage)
+
+### Database Setup
+
+1. **Run SQL Schema:**
+   - Go to your Supabase project SQL Editor
+   - Run the schema files from `DOCUMENTATION/` folder:
+     - `Complete-SQL-Schema.sql` (base schema)
+     - `High-Priority-Features-Schema.sql` (extended features)
+
+2. **Enable Storage:**
+   - Go to Storage in Supabase dashboard
+   - Create a bucket named `item-images`
+   - Set it to public for image access
+
+3. **Configure Authentication:**
+   - Enable Email/Password authentication
+   - Enable Google OAuth (optional)
+   - Add redirect URLs in Authentication settings
+
+### Running the Application
+
+Start Development Server
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+bun run dev
+```
+
+Application will be available at `http://localhost:8080`
+
+Build for Production
+
+```bash
+npm run build
+# or
+yarn build
+# or
+bun run build
+```
+
+Preview Production Build
+
+```bash
+npm run preview
+# or
+yarn preview
+# or
+bun preview
+```
+
+## Project Structure
+
+```
+backtrack-se/
+├── src/
+│   ├── components/          # React components
+│   │   ├── ui/             # shadcn/ui components
+│   │   ├── AIChat.tsx      # AI chat assistant
+│   │   ├── VoiceAssistant.tsx  # Voice posting assistant
+│   │   └── ItemCard.tsx    # Item display card
+│   ├── pages/              # Page components
+│   │   ├── Index.tsx       # Landing page
+│   │   ├── Lost.tsx        # Lost items page
+│   │   ├── Found.tsx       # Found items page
+│   │   ├── PostItem.tsx    # Post item form
+│   │   ├── Profile.tsx     # User profile
+│   │   └── Admin.tsx       # Admin dashboard
+│   ├── services/           # API services
+│   │   ├── openrouter.ts   # OpenRouter API client
+│   │   └── speech-to-text.ts # Speech recognition
+│   ├── integrations/       # Third-party integrations
+│   │   └── supabase/       # Supabase client & types
+│   └── lib/                # Utilities
+├── public/                 # Static assets
+├── DOCUMENTATION/          # Setup guides and docs
+└── package.json           # Dependencies
+```
+
+## Key Features in Detail
 
 ### AI-Powered Search
 
-Our intelligent search system uses natural language processing to understand your queries:
-
-- **Natural Language**: Search using everyday language (e.g., "I lost my blue backpack")
-- **Keyword Extraction**: Automatically extracts relevant keywords from your query
-- **Smart Matching**: Finds items based on description, category, and location
-- **Contextual Results**: Returns results ranked by relevance
+- **Natural Language Processing:** Search using everyday language (e.g., "I lost my blue iPhone near the library")
+- **Keyword Extraction:** Automatically extracts relevant keywords from queries
+- **Smart Matching:** Finds items based on description, category, and location
+- **Contextual Results:** Returns results ranked by relevance
 
 ### Voice Assistant
 
-Post items hands-free using voice commands:
-
-- **Interactive Q&A**: The assistant asks questions about your item
-- **Automatic Form Filling**: Details are automatically extracted and filled in
-- **Speech Recognition**: Works with your browser's speech recognition
-- **Text Fallback**: Manual text input available if voice isn't supported
+- **Interactive Q&A:** The assistant asks questions about your item
+- **Automatic Form Filling:** Details are automatically extracted and filled in
+- **Speech Recognition:** Works with browser's native Web Speech API
+- **Text Fallback:** Manual text input available if voice isn't supported
 
 ### Image Analysis
 
-Upload a photo and let AI extract the details:
+- **Automatic Detection:** Identifies item type, color, and features using Vision AI
+- **Detail Extraction:** Extracts title, description, and category from images
+- **One-Click Fill:** Automatically fills the form with extracted information
 
-- **Automatic Detection**: Identifies item type, color, and features
-- **Detail Extraction**: Extracts title, description, and category
-- **Location Suggestions**: Suggests location based on image context
-- **One-Click Fill**: Automatically fills the form with extracted information
+### Item Claiming System
 
-### Smart Matching
+- **Verification Details:** Submit claims with ownership verification
+- **Status Tracking:** Track claim status (pending, approved, rejected, claimed)
+- **Owner Notifications:** Automatic notifications when items are claimed
+- **Admin Review:** Admin panel for reviewing and approving claims
 
-Our matching system helps connect lost items with their owners:
+### Smart Sorting
 
-- **Description Matching**: Matches items based on detailed descriptions
-- **Category Matching**: Suggests items in the same category
-- **Location Matching**: Prioritizes items from nearby locations
-- **Notification System**: Notifies users when potential matches are found
+- **Automatic Organization:** Claimed items automatically sorted to the end
+- **Date Sorting:** Items sorted by date reported (newest first)
+- **Category Filtering:** Filter by 7 different categories
+- **Search Integration:** Real-time search across all item fields
 
-## 📱 Platform Support
+## API Integration
 
-- **Web Browser**: Works on all modern web browsers
-- **Mobile Responsive**: Fully optimized for mobile devices
-- **Desktop Optimized**: Great experience on desktop computers
-- **Tablet Friendly**: Perfect for tablet browsing
+### Supabase API
 
-## 🔒 Security & Privacy
+**Authentication:**
+- `supabase.auth.signUp()` - User registration
+- `supabase.auth.signInWithPassword()` - Email/password login
+- `supabase.auth.signInWithOAuth()` - Google OAuth
+- `supabase.auth.signOut()` - User logout
 
-- **Secure Authentication**: Google OAuth and secure password authentication
-- **Data Encryption**: All data is encrypted in transit and at rest
-- **Privacy First**: Your personal information is protected
-- **Secure Storage**: Images and data stored securely in Supabase
+**Database:**
+- `supabase.from('items').select()` - Get items
+- `supabase.from('items').insert()` - Create item
+- `supabase.from('items').update()` - Update item
+- `supabase.from('items').delete()` - Delete item
+- `supabase.from('claims').insert()` - Submit claim
 
-## 💡 Tips & Best Practices
+**Storage:**
+- `supabase.storage.from('item-images').upload()` - Upload images
+- `supabase.storage.from('item-images').getPublicUrl()` - Get image URL
 
-### For Better Results
+### OpenRouter API
 
-1. **Clear Photos**: Upload high-quality, well-lit photos
-2. **Detailed Descriptions**: Include specific details like brand, color, size
-3. **Accurate Location**: Provide specific location information
-4. **Regular Updates**: Update your posts if you find your item
+**AI Chat:**
+- POST to OpenRouter API with user query
+- Returns intelligent keyword extraction and search suggestions
 
-### Using AI Features
+**Voice Parsing:**
+- POST transcribed voice text to OpenRouter
+- Returns structured item data (title, description, category, location)
 
-1. **Natural Language**: Speak or type naturally - the AI understands context
-2. **Be Specific**: More details lead to better matches
-3. **Use Photos**: Images help AI extract more accurate information
-4. **Voice Clarity**: Speak clearly when using voice assistant
+**Image Analysis:**
+- POST image to OpenRouter with Vision model
+- Returns extracted item details from image
 
-## 🎨 User Interface
+## Deployment
 
-- **Modern Design**: Clean, intuitive interface designed for ease of use
-- **Smooth Animations**: Smooth transitions and animations for better UX
-- **Dark Mode**: Comfortable viewing in any lighting condition
-- **Responsive Layout**: Adapts to any screen size
-- **Accessibility**: Built with accessibility in mind
+### Frontend
 
-## 📊 Statistics & Analytics
+**Platform:** Vercel (recommended) or Netlify
 
-Track your activity with personal statistics:
+**Live URL:** [akshkhurana.store](https://akshkhurana.store)
 
-- **Items Posted**: Number of items you've posted
-- **Items Found**: Number of items you've successfully found
-- **Claims Submitted**: Number of claims you've submitted
-- **Success Rate**: Your item recovery success rate
+**Deployment Steps:**
 
-## 🌐 Browser Compatibility
+1. Push code to GitHub
+2. Connect repository to Vercel
+3. Add environment variables in Vercel dashboard:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_PUBLISHABLE_KEY`
+   - `VITE_OPENROUTER_API_KEY`
+4. Deploy
+
+### Environment Setup for Production
+
+Make sure to set all environment variables in your deployment platform's environment settings. Never commit `.env` files to version control.
+
+## Documentation
+
+- [AI Features Documentation](./DOCUMENTATION/AI-Features-Documentation.md)
+- [Supabase Setup Guide](./DOCUMENTATION/Supabase-Setup-Guide.md)
+- [Voice Assistant Setup](./DOCUMENTATION/Voice-Assistant-Setup.md)
+- [OAuth Setup](./DOCUMENTATION/OAuth-Setup.md)
+- [High Priority Features Setup](./DOCUMENTATION/High-Priority-Features-Setup.md)
+
+## Project Status
+
+✅ **Completed Features:**
+
+- Authentication & User Management (Email/Password + Google OAuth)
+- Item Posting (Lost/Found with images)
+- AI-Powered Search & Chat
+- Voice-Enabled Item Posting
+- Image Analysis with AI
+- Item Claiming System
+- Advanced Filtering & Sorting
+- Admin Panel
+- Real-time Updates
+- Dark Mode
+- Responsive Design
+- Profile Management
+
+🔄 **In Progress:**
+
+- Enhanced matching algorithms
+- Push notifications
+- Email notifications for claims
+
+📋 **Planned Features:**
+
+- Mobile app (React Native)
+- SMS notifications
+- Advanced analytics dashboard
+- Item recommendations
+
+## Browser Compatibility
 
 - ✅ Chrome (Recommended)
 - ✅ Firefox
@@ -226,47 +360,16 @@ Track your activity with personal statistics:
 - ✅ Edge
 - ✅ Opera
 
-## 📞 Support & Help
+## Contributing
 
-### Getting Help
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-- **Documentation**: Check the documentation for detailed guides
-- **FAQ**: Common questions and answers
-- **Contact**: Reach out through the contact form
-- **Community**: Join our community for tips and support
+## License
 
-### Common Questions
-
-**Q: How do I claim an item?**
-A: Click on the item, then click "Claim This Item" and provide verification details.
-
-**Q: Can I edit my post?**
-A: Yes, you can edit or delete your posts from your profile page.
-
-**Q: How does the AI search work?**
-A: The AI understands natural language and extracts keywords to find matching items.
-
-**Q: Is my data secure?**
-A: Yes, all data is encrypted and stored securely. We use industry-standard security practices.
-
-## 🔗 Links
-
-- **Live Application**: [backtrack-se.vercel.app](https://backtrack-se.vercel.app)
-- **GitHub Repository**: [github.com/iakshkhurana/backtrack-se](https://github.com/iakshkhurana/backtrack-se)
-
-## 🙏 Acknowledgments
-
-- **Thapar Institute of Engineering and Technology** for providing the platform
-- **Supabase** for backend infrastructure
-- **OpenRouter** for AI capabilities
-- **The open-source community** for amazing tools and libraries
-
-## 📄 License
-
-This project is licensed under the MIT License.
+This project is developed as part of academic coursework.
 
 ---
 
-**Made with ❤️ for students by Aksh**
+**Built with ❤️ by Aksh**
 
 *BackTrack Campus Find - Reuniting students with their belongings, one item at a time.*
