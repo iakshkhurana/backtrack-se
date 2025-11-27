@@ -118,8 +118,19 @@ const ResetPassword = () => {
 
       toast.success("Password reset successfully! Redirecting to sign in...");
       
-      // Sign out to ensure clean state
-      await supabase.auth.signOut();
+      // Sign out to ensure clean state (handle gracefully if no session exists)
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          await supabase.auth.signOut();
+        }
+      } catch (signOutError: any) {
+        // Ignore "Auth session missing" errors - user is already signed out
+        if (!signOutError?.message?.includes("Auth session missing") && 
+            !signOutError?.message?.includes("session missing")) {
+          console.warn("Error during sign out after password reset:", signOutError);
+        }
+      }
       
       // Redirect to auth page after a short delay
       setTimeout(() => {

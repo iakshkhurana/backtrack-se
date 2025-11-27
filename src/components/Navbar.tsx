@@ -90,11 +90,34 @@ export const Navbar = ({ darkMode, toggleDarkMode, user, position = "fixed", cus
 
   /**
    * Handle sign out and navigate to auth page
+   * Gracefully handles cases where there's no active session
    */
   const handleSignOut = async () => {
     try {
+      // Check if there's an active session before attempting to sign out
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // No active session, just clear local state and navigate
+        setUserRole(null);
+        setProfilePhoto(null);
+        navigate("/auth");
+        return;
+      }
+
+      // Attempt to sign out if session exists
       const { error } = await supabase.auth.signOut();
+      
       if (error) {
+        // Check if error is due to missing session (already signed out)
+        if (error.message?.includes("Auth session missing") || error.message?.includes("session missing")) {
+          // User is already signed out, just clear state and navigate
+          setUserRole(null);
+          setProfilePhoto(null);
+          navigate("/auth");
+          return;
+        }
+        
         console.error("Sign out error:", error);
         toast.error(`Error signing out: ${error.message}`);
       } else {
@@ -106,6 +129,15 @@ export const Navbar = ({ darkMode, toggleDarkMode, user, position = "fixed", cus
         navigate("/auth");
       }
     } catch (error: any) {
+      // Handle "Auth session missing" error gracefully
+      if (error?.message?.includes("Auth session missing") || error?.message?.includes("session missing")) {
+        // User is already signed out, just clear state and navigate
+        setUserRole(null);
+        setProfilePhoto(null);
+        navigate("/auth");
+        return;
+      }
+      
       console.error("Sign out exception:", error);
       toast.error(`Error signing out: ${error.message || "Unknown error"}`);
     }
