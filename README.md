@@ -10,7 +10,7 @@ An intelligent lost & found management system built with React and Supabase that
 
 ## Tech Stack
 
-**Frontend:** React • TypeScript • Vite • Tailwind CSS • Supabase • OpenRouter AI
+**Frontend:** React • TypeScript • Vite • Tailwind CSS
 
 **Backend:** Supabase (PostgreSQL • Authentication • Storage • Real-time)
 
